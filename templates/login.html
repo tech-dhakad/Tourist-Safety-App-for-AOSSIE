@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Raahi — Sign in / Sign up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* DARK THEME COLORS - Same as index.html */
+      --bg: #0F0F1E;
+      --bg-secondary: #1A1A2E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8B8D1;
+      --text-muted: #8B8BA7;
+      --accent: #00D9FF;
+      --accent-secondary: #7B2CBF;
+      --accent-tertiary: #FF006E;
+      --card-bg: #16213E;
+      --card-hover: #1E2749;
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --card-hover-shadow: 0 12px 48px rgba(0, 217, 255, 0.3);
+      --border-color: rgba(0, 217, 255, 0.2);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body,html{
+      height:100%;
+      margin:0;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(123, 44, 191, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .back-home-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 12px 24px;
+      background: rgba(22, 33, 62, 0.9);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .back-home-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+    }
+    .container{max-width:1100px;margin:36px auto;padding:20px}
+    .wrap{display:flex;gap:24px;align-items:stretch}
+    .left{
+      flex:1;
+      padding:36px;
+      background: var(--card-bg);
+      border-radius:20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
+    }
+    .right{
+      width:420px;
+      background: var(--card-bg);
+      padding:28px;
+      border-radius:20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
+    }
+    .logo{
+      font-weight:900;
+      font-size:22px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom:12px;
+    }
+    h1{
+      margin:0 0 12px 0;
+      font-size:28px;
+      color: var(--text-primary);
+    }
+    p.lead{
+      color: var(--text-secondary);
+      margin:0 0 18px 0;
+      line-height: 1.6;
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .tab{
+      flex:1;
+      padding:10px;
+      border-radius:10px;
+      text-align:center;
+      cursor:pointer;
+      font-weight:800;
+      border:1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+    .tab:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .tab.active{
+      background:linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: var(--bg);
+      box-shadow: 0 8px 24px rgba(0, 217, 255, 0.4);
+      border-color: var(--accent);
+    }
+    form{display:block}
+    .field{margin-bottom:16px}
+    label{
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
+      color: var(--text-primary);
+    }
+    input,select{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size:14px;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+    }
+    input::placeholder {
+      color: var(--text-muted);
+    }
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .btn{
+      padding:12px 20px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: var(--bg);
+      box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 217, 255, 0.5);
+    }
+    .btn-ghost{
+      background:transparent;
+      border:2px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .small{
+      font-size:13px;
+      color: var(--text-secondary);
+    }
+    .footer{
+      margin-top:16px;
+      font-size:13px;
+      color: var(--text-muted);
+    }
+    .note{
+      font-size:13px;
+      color: var(--text-secondary);
+      margin-top:6px;
+      line-height: 1.5;
+    }
+    .success{
+      color: #4ade80;
+      font-weight:700;
+    }
+    .error{
+      color: #f87171;
+      font-weight:700;
+    }
+    /* Feature cards styling */
+    .feature-card {
+      background: var(--bg-secondary);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 217, 255, 0.2);
+    }
+    .feature-card div:first-child {
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <a href="{{ url_for('index') }}" class="back-home-btn">
+    ← Back to Home
+  </a>
+  <div class="container">
+    <div class="wrap">
+      <div class="left">
+        <div class="logo">Raahi — Travel, safe & live</div>
+        <h1>Welcome back — plan, share and travel with confidence</h1>
+        <p class="lead">Sign in to view the live map, share your location with friends, or create an account to save your profile and settings.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px">
+          <div class="feature-card">
+            <div>Calculated Weather</div>
+            <div class="small" style="margin-top:8px">Live weather snippets for the city you visit.</div>
+          </div>
+          <div class="feature-card">
+            <div>Best Flights</div>
+            <div class="small" style="margin-top:8px">Search & compare flight options.</div>
+          </div>
+          <div class="feature-card">
+            <div>Local Events</div>
+            <div class="small" style="margin-top:8px">See what's happening around you.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:22px">
+          <div class="note">This demo stores accounts server-side (in-memory). Quick demo creates a demo account automatically.</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:900">Account</div>
+          <div style="font-size:13px;color:var(--muted)">Secure & local demo</div>
+        </div>
+
+        <div class="tabs">
+          <div id="tab-login" class="tab active">Login</div>
+          <div id="tab-signup" class="tab">Sign up</div>
+        </div>
+
+        <!-- Login form -->
+        <form id="loginForm" style="display:block">
+          <div class="field">
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" placeholder="you@domain.com" required>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" placeholder="Password" required>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" type="submit">Login</button>
+            <button type="button" id="btn-demo-login" class="btn btn-ghost">Quick demo</button>
+          </div>
+          <div id="loginMsg" style="margin-top:10px"></div>
+        </form>
+
+        <!-- Signup form -->
+        <form id="signupForm" style="display:none">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input id="name" type="text" placeholder="e.g. Priya Sharma" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" type="tel" placeholder="+91 98765 43210">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@domain.com" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Choose password" required>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" type="submit">Create account</button>
+            <button type="button" id="btn-cancel-signup" class="btn btn-ghost">Cancel</button>
+          </div>
+          <div id="signupMsg" style="margin-top:10px"></div>
+        </form>
+
+        <div class="footer">By continuing you agree to our demo Terms & Privacy.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const loginMsg = document.getElementById('loginMsg');
+    const signupMsg = document.getElementById('signupMsg');
+
+    function showLogin(){ tabLogin.classList.add('active'); tabSignup.classList.remove('active'); loginForm.style.display='block'; signupForm.style.display='none'; loginMsg.innerHTML=''; signupMsg.innerHTML=''; }
+    function showSignup(){ tabLogin.classList.remove('active'); tabSignup.classList.add('active'); loginForm.style.display='none'; signupForm.style.display='block'; loginMsg.innerHTML=''; signupMsg.innerHTML=''; }
+
+    tabLogin.addEventListener('click', showLogin);
+    tabSignup.addEventListener('click', showSignup);
+    document.getElementById('btn-cancel-signup').addEventListener('click', showLogin);
+
+    // helper: set safarik_user in sessionStorage only (do NOT overwrite server cookie)
+    function persistUserClientSide(user){
+      try {
+        sessionStorage.setItem('safarik_user', JSON.stringify(user));
+      } catch(e){}
+      // NOTE: do not set a cookie here; server will set safarik_user cookie via Set-Cookie header.
+    }
+
+    // check saved redirect (if user was trying to open /realtime)
+    function getPostLoginRedirect(){
+      try {
+        const dest = sessionStorage.getItem('safarik_post_login_redirect');
+        if(dest && dest.length>0) {
+          sessionStorage.removeItem('safarik_post_login_redirect');
+          return dest;
+        }
+      } catch(e){}
+      return '/realtime';
+    }
+
+    // Signup -> call backend /api/signup (include credentials so cookie is accepted)
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      signupMsg.innerHTML = '';
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if(!name || !email || !password || password.length < 4){ signupMsg.innerHTML = '<div class="error">Please fill required fields (password >=4)</div>'; return; }
+      try {
+        const res = await fetch('/api/signup', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          credentials: 'same-origin',
+          body: JSON.stringify({name,phone,email,password})
+        });
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok){ signupMsg.innerHTML = `<div class="error">${data.error||'Signup failed'}</div>`; return; }
+
+        const user = (data && data.user) ? data.user : { id: data.id || ('u'+Math.random().toString(36).slice(2,9)), name, email, phone };
+
+        persistUserClientSide(user);
+        const target = getPostLoginRedirect();
+        window.location.href = target;
+      } catch(err){ signupMsg.innerHTML = '<div class="error">Signup failed (network)</div>'; }
+    });
+
+    // Login -> call backend /api/login (include credentials)
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginMsg.innerHTML = '';
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const res = await fetch('/api/login', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          credentials: 'same-origin',
+          body: JSON.stringify({email,password})
+        });
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok){ loginMsg.innerHTML = `<div class="error">${data.error||'Login failed'}</div>`; return; }
+
+        const user = (data && data.user) ? data.user : { id: data.id || ('u'+Math.random().toString(36).slice(2,9)), name: data.name || email.split('@')[0], email };
+
+        persistUserClientSide(user);
+
+        const target = getPostLoginRedirect();
+        window.location.href = target;
+      } catch (err) {
+        loginMsg.innerHTML = '<div class="error">Login failed (network)</div>';
+      }
+    });
+
+    // quick demo login (server-side)
+    document.getElementById('btn-demo-login').addEventListener('click', async ()=> {
+      const demoEmail = 'demo@local';
+      const demoPass = 'demo123';
+      try {
+        await fetch('/api/signup', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          credentials: 'same-origin',
+          body: JSON.stringify({ name:'Demo User', phone:'', email: demoEmail, password: demoPass })
+        });
+      } catch(e){}
+      try {
+        const res = await fetch('/api/login', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          credentials: 'same-origin',
+          body: JSON.stringify({ email: demoEmail, password: demoPass })
+        });
+        const data = await res.json().catch(()=> ({}));
+        if(!res.ok){ loginMsg.innerHTML = `<div class="error">${data.error||'Demo login failed'}</div>`; return; }
+
+        const user = (data && data.user) ? data.user : { id: data.id || ('u'+Math.random().toString(36).slice(2,9)), name: data.name || 'Demo User', email: demoEmail };
+        persistUserClientSide(user);
+
+        const target = getPostLoginRedirect();
+        window.location.href = target;
+      } catch(e){ loginMsg.innerHTML = '<div class="error">Demo login failed</div>'; }
+    });
+  </script>
+</body>
+</html>

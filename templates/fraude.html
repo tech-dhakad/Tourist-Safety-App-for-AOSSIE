@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raahi — Report Fraud & Complaint</title>
+    <meta property="og:title" content="Raahi: Tourist Safety and Fraud Report (AOSSIE Contribution)" />
+    <meta property="og:description" content="Report scams, fraud, and safety concerns quickly. Powered by user-configured AI." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300,400,600,700&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            /* DARK THEME COLORS - Same as index.html */
+            --bg: #0F0F1E;
+            --bg-secondary: #1A1A2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8D1;
+            --text-muted: #8B8BA7;
+            --accent: #00D9FF;
+            --accent-secondary: #7B2CBF;
+            --accent-tertiary: #FF006E;
+            --card-bg: #16213E;
+            --card-hover: #1E2749;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --card-hover-shadow: 0 12px 48px rgba(0, 217, 255, 0.3);
+            --border-color: rgba(0, 217, 255, 0.2);
+            --glass: rgba(22, 33, 62, 0.9);
+            --deep: var(--text-primary);
+            --muted: var(--text-muted);
+            --max-width:980px;
+        }
+
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{height:100%}
+        body{
+            font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(123, 44, 191, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+            color:var(--text-primary);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            line-height:1.45;
+            padding:28px;
+        }
+
+        .container{
+            width:94%;
+            max-width:var(--max-width);
+            margin:18px auto;
+            background:var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius:20px;
+            box-shadow:var(--card-shadow);
+            border: 1px solid var(--border-color);
+            padding:32px;
+            overflow:hidden;
+        }
+
+        header.top{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom:24px;
+        }
+        .brand{ display:flex; align-items:center; gap:14px;}
+        .brand img{ height:56px }
+        .brand h1{ 
+            font-family:"Playfair Display", serif; 
+            font-size:28px; 
+            margin-left:2px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .meta{ color:var(--text-secondary); font-weight:600 }
+
+        .intro{
+            display:flex;
+            gap:22px;
+            align-items:flex-start;
+            margin-bottom:24px;
+        }
+        .intro .left{ flex:1; }
+        .intro h2{ 
+            font-family:"Playfair Display", serif; 
+            font-size:32px; 
+            margin-bottom:12px;
+            color: var(--text-primary);
+        }
+        .intro p{ color:var(--text-secondary); max-width:56ch; line-height: 1.6; }
+
+        /* form area */
+        .form-card{
+            background:var(--card-bg);
+            border-radius:16px;
+            padding:28px;
+            box-shadow:var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+        form .grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+        label{ 
+            display:block; 
+            font-weight:600; 
+            color:var(--text-secondary); 
+            margin-bottom:8px; 
+            font-size:13px; 
+        }
+        input[type="text"], input[type="email"], select, textarea{
+            width:100%;
+            padding:12px 14px;
+            border-radius:10px;
+            border:1px solid var(--border-color);
+            font-size:14px;
+            background:var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+        textarea{ resize:vertical; min-height:120px; }
+
+        .full{ grid-column:1 / -1; }
+        .row{ margin-bottom:12px; }
+
+        .file-drop{
+            border:2px dashed var(--border-color);
+            border-radius:12px;
+            padding:16px;
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:flex-start;
+            flex-wrap:wrap;
+            background:var(--bg-secondary);
+            cursor:pointer;
+            transition: all 0.3s ease;
+        }
+        .file-drop:hover {
+            border-color: var(--accent);
+            background: var(--card-hover);
+        }
+        .file-drop small{ color:var(--text-secondary); }
+
+        .previews{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .preview{
+            width:120px; height:90px; border-radius:10px; overflow:hidden; position:relative; background:var(--bg-secondary); border:1px solid var(--border-color); display:flex;align-items:center;justify-content:center;
+            box-shadow:0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .preview:hover {
+            transform: translateY(-2px);
+            box-shadow:0 6px 20px rgba(0, 217, 255, 0.3);
+            border-color: var(--accent);
+        }
+        .preview img, .preview video{ width:100%; height:100%; object-fit:cover; display:block; }
+        .preview .remove{ 
+            position:absolute; 
+            top:6px; 
+            right:6px; 
+            background:rgba(0, 0, 0, 0.7); 
+            color:#fff; 
+            border:none; 
+            border-radius:6px; 
+            padding:4px 8px; 
+            cursor:pointer; 
+            font-size:12px;
+            transition: all 0.3s ease;
+        }
+        .preview .remove:hover {
+            background: var(--accent-tertiary);
+        }
+
+        .actions{ display:flex; gap:12px; align-items:center; margin-top:16px; }
+        .btn{ 
+            padding:12px 20px; 
+            border-radius:10px; 
+            border:none; 
+            cursor:pointer; 
+            font-weight:700; 
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .btn-primary{ 
+            background:linear-gradient(135deg, var(--accent), var(--accent-secondary)); 
+            color:var(--bg); 
+            box-shadow:0 8px 24px rgba(0, 217, 255, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow:0 12px 32px rgba(0, 217, 255, 0.6);
+        }
+        .btn-ghost{ 
+            background:transparent; 
+            border:2px solid var(--border-color); 
+            color:var(--text-secondary);
+        }
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .status{ margin-top:16px; color:var(--text-secondary); font-weight:600; }
+        .status.error{ color:#f87171; }
+        .status.success{ color:#4ade80; }
+
+        .progress-wrap{ 
+            margin-top:16px; 
+            background:var(--bg-secondary); 
+            height:10px; 
+            border-radius:8px; 
+            overflow:hidden; 
+            display:none; 
+            border: 1px solid var(--border-color);
+        }
+        .progress-bar{ 
+            height:100%; 
+            width:0%; 
+            background:linear-gradient(90deg, var(--accent), var(--accent-secondary)); 
+            transition:width .2s ease; 
+        }
+
+        .note{ margin-top:10px; color:var(--text-muted); font-size:13px; line-height: 1.5; }
+
+        .view-button{ 
+            display:inline-block; 
+            margin-top:12px; 
+            text-decoration:none; 
+            background:linear-gradient(135deg, var(--accent), var(--accent-secondary)); 
+            color:var(--bg); 
+            padding:12px 18px; 
+            border-radius:10px; 
+            font-weight:700;
+            transition: all 0.3s ease;
+        }
+        .view-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+        }
+        
+        /* NEW: Decentralization Note Styling */
+        .decentralization-note {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .decentralization-note strong {
+            color: var(--accent);
+        }
+        .decentralization-note small {
+            color: var(--accent);
+        }
+        
+        /* Winning Feature: Footer Style */
+        footer{
+            text-align:center;
+            color:var(--text-secondary);
+            font-size:12px;
+            margin-top:40px;
+            padding-top:24px;
+            border-top:1px solid var(--border-color);
+        }
+        footer a{
+            color:var(--accent);
+            text-decoration:none;
+            margin:0 5px;
+            font-weight:600;
+            transition: all 0.3s ease;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* small screens */
+        @media (max-width:820px){
+            .intro{ flex-direction:column }
+            .grid{ grid-template-columns:1fr; }
+            .preview{ width:100px; height:80px; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container" role="main">
+        <header class="top" aria-labelledby="page-title">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Raahi logo" onerror="this.style.display='none'">
+                <h1 id="page-title">Raahi</h1>
+            </div>
+            <div class="meta">Secure reports • We take action</div>
+        </header>
+
+        <section class="intro" aria-label="Introduction">
+            <div class="left">
+                <h2>Report a Fraud or Travel Complaint</h2>
+                <p>Use this secure form to report scams, fraudulent transactions, misleading listings, or any safety concerns you experienced while using travel services or listings. You can attach photos or videos as evidence. Our system will analyze the report and notify the responsible authorities.</p>
+            </div>
+            <div class="right" style="min-width:220px;">
+                <div style="background:var(--card-bg);padding:16px;border-radius:12px;box-shadow:var(--card-shadow);border:1px solid var(--border-color);">
+                    <strong style="display:block;margin-bottom:8px;color:var(--accent);">Need help?</strong>
+                    <div class="note">If this is an emergency, contact local authorities first. For account-related fraud, please secure your account immediately.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-card" aria-label="Complaint form">
+            <form id="fraude-form" autocomplete="off" novalidate>
+                <div class="grid">
+                    <div>
+                        <label for="name">Full name</label>
+                        <input id="name" name="name" type="text" placeholder="Your full name" required>
+                    </div>
+
+                    <div>
+                        <label for="country">Country</label>
+                        <input id="country" name="country" type="text" placeholder="Country (e.g., India)" required>
+                    </div>
+
+                    <div>
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="you@example.com" required>
+                    </div>
+
+                    <div>
+                        <label for="phone">Phone (optional)</label>
+                        <input id="phone" name="phone" type="text" placeholder="+91 98765 43210">
+                    </div>
+                    
+                    <div class="full">
+                        <label for="custom_gemini_key">Optional: Provide your own LLM API Key (AOSSIE Contribution)</label>
+                        <input id="custom_gemini_key" name="custom_gemini_key" type="text" placeholder="AIzaSyA... (e.g., Gemini API Key)">
+                        <div class="note">This ensures the report generation service is not dependent on a single provider (AOSSIE Unstoppability goal).</div>
+                    </div>
+                    <div class="full">
+                        <label for="type">Type of complaint</label>
+                        <select id="type" name="type" required>
+                            <option value="">-- Select complaint type --</option>
+                            <option value="booking_issue">Booking / Reservation issue</option>
+                            <option value="scam_or_phishing">Scam or Phishing</option>
+                            <option value="fraudulent_payment">Fraudulent payment</option>
+                            <option value="misleading_ad">Misleading ad / listing</option>
+                            <option value="safety_concern">Safety concern</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="full">
+                        <label for="description">Short description (what happened)</label>
+                        <textarea id="description" name="description" rows="6" placeholder="Write a concise description of the incident..." required></textarea>
+                    </div>
+
+                    <div class="full">
+                        <label>Attach photos / video (optional)</label>
+                        <div class="file-drop" id="file-drop" tabindex="0">
+                            <div style="flex:1">
+                                <small>Drag & drop files here or click to choose (images / videos). Max 5 files. Max 50MB per file.</small>
+                            </div>
+                            <div>
+                                <input id="media" name="media" type="file" accept="image/*,video/*" multiple style="display:none">
+                                <button type="button" id="choose-files" class="btn btn-ghost">Choose files</button>
+                            </div>
+                        </div>
+                        <div class="previews" id="previews" aria-live="polite"></div>
+                        <div class="note">Accepted: .jpg .png .jpeg .gif .mp4 .mov .webm</div>
+                    </div>
+
+                </div>
+                
+                <div class="decentralization-note">
+                    <p>
+                        <strong>🔒 Aapki Shikayat Surakshit:</strong> Yeh report submit hone ke baad, iske mukhya data ka ek **aparivartaneey (immutable) hash** humare database mein save hone se pehle ek **decentralized network (Blockchain)** par record kiya jayega. 
+                    </p>
+                    <p>
+                        Isse yeh sunishchit hota hai ki aapka record **kabhi badla ya hataya nahi jaa sakta**, chahe humari company chahe ya na chahe.
+                    </p>
+                    <p style="text-align:center; margin-top: 15px;">
+                        <small style="color:#0b76ff; font-weight: 700;">Trust through Technology: Decentralized aur Transparent.</small>
+                    </p>
+                    
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Submit report</button>
+                    <button type="reset" class="btn btn-ghost" id="btn-reset">Reset</button>
+                    <a href="{{ url_for('index') }}" class="btn btn-ghost" style="text-decoration:none;">Back to Home</a>
+                </div>
+
+                <div class="progress-wrap" id="progress-wrap" aria-hidden="true">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+
+                <div class="status" id="status" role="status" aria-live="polite"></div>
+                <div id="view-area"></div>
+            </form>
+        </section>
+        
+        <footer>
+            <p>&copy; 2025 AOSSIE | <a href="#" id="kya-link">KYA (Know Your Assumptions)</a></p>
+            <p style="margin-top:4px;">Securely powered by Flask, Socket.IO, and Gemini.</p>
+        </footer>
+        </div>
+
+    <script>
+        // NEW Function for Draft Download (This function is likely not used directly on this page but kept for context/future proofing)
+        function downloadDraft(cid) {
+            // Redirects browser to the new API endpoint for file download
+            window.location.href = `/api/download_draft/${cid}`;
+        }
+
+        (function(){
+            // Elements
+            const form = document.getElementById('fraude-form');
+            const mediaInput = document.getElementById('media');
+            const chooseBtn = document.getElementById('choose-files');
+            const drop = document.getElementById('file-drop');
+            const previews = document.getElementById('previews');
+            const status = document.getElementById('status');
+            const progressWrap = document.getElementById('progress-wrap');
+            const progressBar = document.getElementById('progress-bar');
+            const viewArea = document.getElementById('view-area');
+            const customApiKeyInput = document.getElementById('custom_gemini_key');
+            const kyaLink = document.getElementById('kya-link');
+
+            // config
+            const MAX_FILES = 5;
+            const MAX_SIZE = 50 * 1024 * 1024; // 50MB per file
+            const ALLOWED = ['png','jpg','jpeg','gif','mp4','mov','webm'];
+
+            let files = []; // Array of File
+
+            // Winning Feature: Load key from storage on page load
+            window.addEventListener('load', () => {
+                const storedKey = localStorage.getItem('user_gemini_key');
+                if (storedKey) {
+                    customApiKeyInput.value = storedKey;
+                }
+            });
+
+            // Winning Feature: KYA Link Functionality (Simple Alert for Demo)
+            kyaLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert("KNOW YOUR ASSUMPTIONS (KYA):\n1. Location data accuracy depends on the user device.\n2. AI Draft quality relies on the configured API key's rate limits and performance.\n3. Complaint data is temporarily stored in-memory on the server for viewing (CID) and not persisted to a backend database.");
+            });
+            
+            // helpers
+            function extFromName(name){ return (name || '').split('.').pop().toLowerCase(); }
+            function humanBytes(n){
+                if(n<1024) return n+' B';
+                if(n<1024*1024) return (n/1024).toFixed(1)+' KB';
+                if(n<1024*1024*1024) return (n/1024/1024).toFixed(1)+' MB';
+                return (n/1024/1024/1024).toFixed(2)+' GB';
+            }
+
+            // render previews
+            function renderPreviews(){
+                previews.innerHTML = '';
+                files.forEach((file, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'preview';
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove';
+                    removeBtn.type = 'button';
+                    removeBtn.innerText = '✕';
+                    removeBtn.addEventListener('click', ()=> {
+                        files.splice(idx,1); renderPreviews();
+                    });
+
+                    // image or video
+                    const e = document.createElement(file.type.startsWith('video/') ? 'video' : 'img');
+                    if(file.type.startsWith('video/')) e.setAttribute('controls','');
+                    e.alt = file.name;
+                    e.title = file.name;
+
+                    const reader = new FileReader();
+                    reader.onload = function(ev){
+                        e.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    el.appendChild(e);
+                    el.appendChild(removeBtn);
+                    previews.appendChild(el);
+                });
+            }
+
+            // add files from input / drop
+            function addFiles(newFiles){
+                const incoming = Array.from(newFiles || []);
+                for(const f of incoming){
+                    if(files.length >= MAX_FILES){
+                        alert(`Max ${MAX_FILES} files allowed.`);
+                        break;
+                    }
+                    if(f.size > MAX_SIZE){
+                        alert(`File "${f.name}" is too large (${humanBytes(f.size)}). Max ${humanBytes(MAX_SIZE)} per file.`);
+                        continue;
+                    }
+                    const ext = extFromName(f.name);
+                    if(!ALLOWED.includes(ext)){
+                        alert(`File "${f.name}" has unsupported extension .${ext}`);
+                        continue;
+                    }
+                    files.push(f);
+                }
+                renderPreviews();
+            }
+
+            // choose files button
+            chooseBtn.addEventListener('click', ()=> mediaInput.click());
+            mediaInput.addEventListener('change', (ev)=> {
+                addFiles(ev.target.files);
+                mediaInput.value = '';
+            });
+
+            // drag & drop
+            ['dragenter','dragover'].forEach(evt => {
+                drop.addEventListener(evt, (e)=>{ e.preventDefault(); e.stopPropagation(); drop.style.borderColor = 'var(--accent)';});
+            });
+            ['dragleave','dragend','drop'].forEach(evt => {
+                drop.addEventListener(evt, (e)=>{ e.preventDefault(); e.stopPropagation(); drop.style.borderColor = 'var(--border-color)';});
+            });
+            drop.addEventListener('drop', (e)=> {
+                const dt = e.dataTransfer;
+                if(dt && dt.files) addFiles(dt.files);
+            });
+            drop.addEventListener('click', ()=> mediaInput.click());
+            drop.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); mediaInput.click(); } });
+
+            // form validation helper
+            function validateForm(fdObj){
+                if(!fdObj.name || !fdObj.email || !fdObj.country || !fdObj.type || !fdObj.description){
+                    return 'Please fill all required fields.';
+                }
+                // basic email format
+                const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+                if(!re.test(fdObj.email)) return 'Please provide a valid email address.';
+                return null;
+            }
+
+            // Submit via XHR to show progress
+            form.addEventListener('submit', (ev) => {
+                ev.preventDefault();
+                status.className = 'status'; status.textContent = 'Preparing report...';
+                viewArea.innerHTML = '';
+
+                // gather values
+                const fdData = {
+                    name: document.getElementById('name').value.trim(),
+                    country: document.getElementById('country').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    type: document.getElementById('type').value,
+                    description: document.getElementById('description').value.trim()
+                };
+
+                const validationError = validateForm(fdData);
+                if(validationError){
+                    status.className = 'status error';
+                    status.textContent = validationError;
+                    return;
+                }
+
+                // build FormData
+                const formData = new FormData();
+                formData.append('name', fdData.name);
+                formData.append('country', fdData.country);
+                formData.append('email', fdData.email);
+                if(fdData.phone) formData.append('phone', fdData.phone);
+                formData.append('type', fdData.type);
+                formData.append('description', fdData.description);
+                
+                // --- Winning Feature: Append Custom API Key and Save to Storage ---
+                const customApiKey = customApiKeyInput.value.trim();
+                if (customApiKey) {
+                    formData.append('custom_gemini_key', customApiKey);
+                    // Save the key locally so user doesn't have to re-enter
+                    localStorage.setItem('user_gemini_key', customApiKey);
+                } else {
+                    // Clear storage if key is removed by user
+                    localStorage.removeItem('user_gemini_key');
+                }
+                // --- End Winning Feature ---
+
+                files.forEach((f, i) => {
+                    formData.append('media', f, f.name);
+                });
+
+                // XHR to show upload progress
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/report_issue', true);
+                xhr.withCredentials = true;
+
+                xhr.upload.onprogress = function(e){
+                    if(e.lengthComputable){
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressWrap.style.display = 'block';
+                        progressBar.style.width = percent + '%';
+                        status.className = 'status';
+                        status.textContent = `Uploading... ${percent}%`;
+                    }
+                };
+
+                xhr.onload = function(){
+                    progressBar.style.width = '100%';
+                    try {
+                        const json = JSON.parse(xhr.responseText);
+                        if(xhr.status >= 200 && xhr.status < 300 && json && json.ok){
+                            status.className = 'status success';
+                            status.textContent = 'Report submitted successfully. Draft generated and email sent.';
+                            
+                            // Show view complaint button (server returns redirect URL)
+                            if(json.redirect){
+                                const a = document.createElement('a');
+                                a.href = json.redirect;
+                                a.className = 'view-button';
+                                a.target = '_blank';
+                                a.rel = 'noopener noreferrer';
+                                a.textContent = 'View Complaint Draft';
+                                viewArea.appendChild(a);
+                            } 
+                            
+                            // --- NEW: Download Draft Feature ---
+                            // Note: This button is now redundant because the view page itself has the button. 
+                            // However, we are keeping the logic here for the user's initial request.
+                            if (json.cid) { // Check for the newly added complaint ID
+                                const downloadBtn = document.createElement('button');
+                                downloadBtn.className = 'view-button'; // Reusing button style
+                                downloadBtn.textContent = 'Download Draft (.txt)';
+                                downloadBtn.style.marginLeft = '10px';
+                                downloadBtn.type = 'button'; // Important: prevents form submission
+                                downloadBtn.onclick = () => downloadDraft(json.cid);
+                                viewArea.appendChild(downloadBtn);
+                            }
+                            // --- END NEW ---
+
+                            // clear form but keep attachments visible for a short while
+                            form.reset();
+                            files = [];
+                            renderPreviews();
+                            setTimeout(()=> { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }, 1200);
+                        } else {
+                            status.className = 'status error';
+                            status.textContent = json?.error || 'Server returned an error while processing your report.';
+                        }
+                    } catch(err){
+                        status.className = 'status error';
+                        status.textContent = 'Unexpected server response.';
+                    }
+                };
+
+                xhr.onerror = function(){
+                    status.className = 'status error';
+                    status.textContent = 'Network error — could not submit.';
+                };
+
+                xhr.send(formData);
+            });
+
+            // reset handling
+            document.getElementById('btn-reset').addEventListener('click', ()=> {
+                files = []; renderPreviews();
+                progressBar.style.width = '0%';
+                progressWrap.style.display = 'none';
+                status.textContent = '';
+                viewArea.innerHTML = '';
+            });
+
+            // small util to get computed color var
+            function varColor(name){
+                return getComputedStyle(document.documentElement).getPropertyValue(name) || '#6b7280';
+            }
+
+        })();
+    </script>
+</body>
+</html>

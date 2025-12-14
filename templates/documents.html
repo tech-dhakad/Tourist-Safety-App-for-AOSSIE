@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raahi — Decentralized Documents</title>
+    <style>
+        :root {
+            --bg: #0F0F1E;
+            --bg-secondary: #1A1A2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8D1;
+            --accent: #00D9FF;
+            --accent-secondary: #7B2CBF;
+            --card-bg: #16213E;
+            --border-color: rgba(0, 217, 255, 0.2);
+            --max-width: 1280px;
+        }
+
+        body {
+            font-family: "Poppins", Inter, system-ui;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            width: 90%;
+            max-width: var(--max-width);
+            margin: 40px auto;
+            padding: 40px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        h2 {
+            font-size: 32px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .upload-form {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .upload-form label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .upload-form input[type="text"], .upload-form input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        .btn-upload {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            color: var(--bg);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .btn-upload:hover {
+            transform: translateY(-2px);
+        }
+        #document-list {
+            list-style: none;
+            padding: 0;
+        }
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .doc-item:hover {
+            border-color: var(--accent);
+        }
+        .doc-item strong {
+            color: var(--accent);
+        }
+        .doc-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        #message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background-color: rgba(0, 255, 0, 0.1);
+            color: lightgreen;
+        }
+        .error {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: red;
+        }
+        .decentralized-badge {
+            font-size: 12px;
+            background: #7B2CBF;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>📄 Decentralized Document Vault</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 25px;">Secure your sensitive travel documents. All files are <strong style="color: #FF006E;">encrypted locally</strong>, stored on <strong style="color: #00D9FF;">IPFS</strong>, and anchored on the **blockchain** for immutable proof of existence.</p>
+
+        <div class="upload-form">
+            <form id="document-upload-form" enctype="multipart/form-data">
+                <label for="name">Document Name (e.g., Passport, Visa, E-Ticket)</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="file">Select File (Encrypted and secured)</label>
+                <input type="file" id="file" name="file" required>
+
+                <p style="margin-top: 10px; font-size: 14px; color: orange;">
+                    *Mock Warning: In a real scenario, Client-Side Encryption logic would execute here before upload.*
+                </p>
+
+                <button type="submit" class="btn-upload">Secure Document</button>
+            </form>
+            <div id="message" style="display: none;"></div>
+        </div>
+
+        <h3>Your Secured Documents</h3>
+        <ul id="document-list">
+            <li style="color: var(--text-secondary);">No documents secured yet.</li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('document-upload-form');
+            const documentList = document.getElementById('document-list');
+            const messageDiv = document.getElementById('message');
+
+            function showMessage(msg, type) {
+                messageDiv.textContent = msg;
+                messageDiv.className = type;
+                messageDiv.style.display = 'block';
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            function addDocumentToList(doc) {
+                const li = document.createElement('li');
+                li.className = 'doc-item';
+                
+                const date = new Date(doc.created_at * 1000).toLocaleString();
+
+                li.innerHTML = `
+                    <div>
+                        <strong>${doc.name}</strong> (${doc.filename || 'File'})
+                        <span class="decentralized-badge">SECURED</span>
+                        <p style="font-size: 12px; margin-top: 5px; color: var(--text-muted);">
+                            IPFS CID: ${doc.ipfs_cid.substring(0, 10)}... | TX Hash: ${doc.tx_hash.substring(0, 10)}... 
+                            <br>Anchored on ${doc.chain_name} at ${date}
+                        </p>
+                    </div>
+                    <a href="#" onclick="alert('In a real app, this downloads the encrypted file via CID and decrypts it locally.')">Retrieve (Encrypted)</a>
+                `;
+                documentList.prepend(li); // Show newest first
+                // Remove placeholder if it exists
+                const placeholder = documentList.querySelector('li[style*="color:"]');
+                if (placeholder) {
+                    documentList.removeChild(placeholder);
+                }
+            }
+
+            // Function to fetch and display existing documents
+            async function loadDocuments() {
+                try {
+                    const res = await fetch('/api/get_documents');
+                    const data = await res.json();
+                    
+                    documentList.innerHTML = ''; // Clear existing list
+                    if (data.ok && data.documents.length > 0) {
+                        data.documents.forEach(addDocumentToList);
+                    } else {
+                        documentList.innerHTML = '<li style="color: var(--text-secondary);">No documents secured yet.</li>';
+                    }
+                } catch (e) {
+                    console.error("Error loading documents:", e);
+                    showMessage('Error loading documents list.', 'error');
+                }
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Check for user login status (basic check, server does final validation)
+                if (!document.cookie.includes('safarik_user')) {
+                    showMessage('Please log in before securing a document.', 'error');
+                    return;
+                }
+
+                const formData = new FormData(form);
+                
+                // *** MOCK: REAL CLIENT-SIDE ENCRYPTION WOULD HAPPEN HERE ***
+                // The JavaScript would encrypt formData.get('file') and replace it 
+                // with the encrypted blob before sending.
+                // **********************************************************
+
+                try {
+                    const res = await fetch('/api/upload_document', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                        showMessage('Document successfully secured on IPFS! Server copy deleted.', 'success');
+                        form.reset(); // Clear form after success
+                        addDocumentToList(data.document);
+                    } else {
+                        showMessage(`Upload Failed: ${data.error}`, 'error');
+                    }
+                } catch (e) {
+                    showMessage('Network error or server connection failed.', 'error');
+                    console.error(e);
+                }
+            });
+
+            loadDocuments(); // Load documents on page load
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Complaint Submitted - Raahi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --surface: #ffffff;
+            --accent: #0b76ff;
+            --success: #22c55e;
+            --muted: #6b7280;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            color: var(--success);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h3 {
+            border-bottom: 2px solid #f0f4f8;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            color: #0f2138;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .proof-box {
+            background: #eef2f8;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .proof-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .proof-label {
+            font-weight: 700;
+            color: #334155;
+            width: 30%;
+        }
+
+        .proof-value {
+            width: 65%;
+            font-family: monospace;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            color: #0f2138;
+            cursor: pointer;
+        }
+        
+        .proof-value:hover {
+            text-decoration: underline;
+        }
+
+        .ai-draft pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .note {
+            margin-top: 30px;
+            padding: 15px;
+            background: #fffbe6;
+            border: 1px solid #fde047;
+            color: #78350f;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        
+        .data-table th {
+            font-weight: 700;
+            color: var(--muted);
+            width: 35%;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✅ Complaint Filed Successfully</h2>
+        <p>Thank you for submitting your report. Your complaint has been assigned the ID **{{ data.id }}** and has been forwarded to the appropriate team via email.</p>
+
+        <h3>🔗 Proof of Immutable Record (Decentralization)</h3>
+        <div class="note">
+            This complaint data is secured on a decentralized network, ensuring the record is **permanent and cannot be tampered with** by any central authority, including Raahi.
+            
+        </div>
+
+        {% if data.decentralized_record %}
+        <div class="proof-box">
+            <div class="proof-row">
+                <div class="proof-label">Data Hash (IPFS CID):</div>
+                <div class="proof-value" title="Content Identifier for the full report data">
+                    <a href="https://ipfs.io/ipfs/{{ data.decentralized_record.ipfs_cid }}" target="_blank" rel="noopener noreferrer">
+                        {{ data.decentralized_record.ipfs_cid }}
+                    </a>
+                </div>
+            </div>
+            <div class="proof-row">
+                <div class="proof-label">Chain Transaction (Tx Hash):</div>
+                <div class="proof-value" title="Proof that the IPFS CID was recorded on the {{ data.decentralized_record.chain }}">
+                    <a href="https://etherscan.io/tx/{{ data.decentralized_record.tx_hash }}" target="_blank" rel="noopener noreferrer">
+                        {{ data.decentralized_record.tx_hash[:10] }}...{{ data.decentralized_record.tx_hash[-8:] }}
+                    </a>
+                </div>
+            </div>
+            <div class="proof-row">
+                <div class="proof-label">Blockchain Network:</div>
+                <div class="proof-value">{{ data.decentralized_record.chain }}</div>
+            </div>
+        </div>
+        {% else %}
+            <p style="color:var(--danger)">Warning: Decentralized record data is missing. Please contact support with your Complaint ID.</p>
+        {% endif %}
+        <h3>📝 Report Details</h3>
+        <table class="data-table">
+            <tr>
+                <th>Complaint ID</th>
+                <td>{{ data.id }}</td>
+            </tr>
+            <tr>
+                <th>Reported By</th>
+                <td>{{ data.fields.name }} ({{ data.fields.email }})</td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td>{{ data.fields.type | replace('_', ' ') | title }}</td>
+            </tr>
+            <tr>
+                <th>Country</th>
+                <td>{{ data.fields.country }}</td>
+            </tr>
+            <tr>
+                <th>Attachments</th>
+                <td>{{ data.attachments | length }} file(s)</td>
+            </tr>
+        </table>
+        
+        <h3>🤖 AI Generated Draft Email</h3>
+        <p style="font-size:14px;color:var(--muted)">This draft was sent to our investigation team for swift processing.</p>
+        <div class="ai-draft">
+            <pre>Subject: {{ data.ai_subject }}
+
+{{ data.ai_draft }}
+            </pre>
+        </div>
+        
+    </div>
+</body>
+</html>

@@ -1,0 +1,1647 @@
+<!doctype html>
+
+<html lang="en">
+
+
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Raahi — Realtime Map (Jaipur) — Routes & Search</title>
+
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        :root {
+            /* DARK THEME COLORS - Same as index.html */
+            --bg: #0F0F1E;
+            --bg-secondary: #1A1A2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8D1;
+            --text-muted: #8B8BA7;
+            --accent: #00D9FF;
+            --accent-secondary: #7B2CBF;
+            --accent-tertiary: #FF006E;
+            --card-bg: #16213E;
+            --card-hover: #1E2749;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --card-hover-shadow: 0 12px 48px rgba(0, 217, 255, 0.3);
+            --border-color: rgba(0, 217, 255, 0.2);
+            --glass: rgba(22, 33, 62, 0.9);
+            --success: #4ade80;
+            --surface: var(--card-bg);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(123, 44, 191, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+
+
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-between;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin: 0;
+        }
+
+
+
+        .brand-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+        }
+
+
+
+        header img.logo {
+
+            height: 56px;
+
+            width: auto;
+
+            border-radius: 10px;
+
+            box-shadow: 0 6px 22px rgba(11, 118, 255, 0.08);
+
+        }
+
+
+
+        header h1 {
+            margin: 0;
+            font-family: "Playfair Display", serif;
+            font-size: 20px;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .you {
+            font-weight: 700;
+            margin-top: 2px;
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+
+
+        .header-right {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-wrap: wrap
+        }
+
+
+
+        .control-box {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--glass);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+        }
+
+        .control-box .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: var(--bg);
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        .control-box .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .control-box select,
+        .control-box input[type="search"] {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+            min-width: 190px;
+            transition: all 0.3s ease;
+        }
+        .control-box select:focus,
+        .control-box input[type="search"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+        .control-box input[type="search"]::placeholder {
+            color: var(--text-muted);
+        }
+
+
+
+        .main {
+            display: flex;
+            gap: 18px;
+            padding: 18px;
+            height: calc(100vh - 80px);
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+
+
+        .sidebar {
+            width: 360px;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+
+
+        .map-wrap {
+            position: relative;
+            flex: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+
+
+        #map {
+
+            width: 100%;
+
+            height: 100%;
+
+        }
+
+
+
+        .top-bar {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 8px;
+
+        }
+
+
+
+        .title {
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .last-updated {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+
+
+        .users-list {
+            flex: 1;
+            overflow: auto;
+            margin-top: 12px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 12px;
+        }
+
+        .user-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .user-row:hover {
+            transform: translateX(4px);
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .user-loc {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .controls .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .controls .btn:hover {
+            transform: translateY(-2px);
+        }
+
+
+
+        .note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+
+
+        /* route info panel */
+        .routes-panel {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .route-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .route-row:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
+            border-color: var(--accent);
+        }
+
+        .route-row.selected {
+            box-shadow: 0 12px 32px rgba(0, 217, 255, 0.4);
+            transform: translateY(-6px);
+            background: var(--card-hover);
+            border-color: var(--accent);
+        }
+
+        .route-info {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .route-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 217, 255, 0.15);
+            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: .4px;
+        }
+
+        .route-price {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--accent);
+        }
+
+
+
+        .legend {
+
+            display: flex;
+
+            gap: 8px;
+
+            align-items: center;
+
+            margin-top: 8px;
+
+            font-size: 13px
+        }
+
+
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-right: 6px
+        }
+
+
+
+        .routes-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center
+        }
+
+
+
+        .link-small {
+            font-size: 13px;
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .link-small:hover {
+            background: rgba(0, 217, 255, 0.1);
+            text-decoration: underline;
+        }
+        .small {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+
+
+        @media (max-width:980px) {
+
+            .main {
+
+                flex-direction: column;
+
+                height: auto
+            }
+
+
+
+            .sidebar {
+
+                width: 100%;
+
+                order: 2
+            }
+
+
+
+            .map-wrap {
+
+                order: 1;
+
+                height: 420px
+            }
+
+
+
+            header {
+
+                flex-direction: column;
+
+                align-items: flex-start
+            }
+
+        }
+    </style>
+
+</head>
+
+
+
+<body>
+    <header>
+
+        <div class="brand-left">
+
+            <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Raahi"
+                onerror="this.style.display='none'">
+
+            <div>
+
+                <h1>Raahi — Realtime (Jaipur)</h1>
+
+                <div class="you" id="youName">You: —</div>
+
+                <div class="small" id="onlineCount">Online: 0</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="header-right">
+
+            <div class="control-box" role="toolbar" aria-label="map controls">
+
+                <input id="searchBox" type="search" placeholder="Search Jaipur places..." aria-label="Search Jaipur" />
+
+                <button id="btnSearch" class="btn">Search</button>
+
+
+
+                <select id="placeSelect" aria-label="Must visit places">
+
+                    <option value="">Must visit (Jaipur)</option>
+
+                    <option value="hawa_mahal">Hawa Mahal</option>
+
+                    <option value="amber_fort">Amber Fort</option>
+
+                    <option value="city_palace">City Palace</option>
+
+                    <option value="jantar_mantar">Jantar Mantar</option>
+
+                    <option value="jal_mahal">Jal Mahal</option>
+
+                    <option value="nahargarh">Nahargarh Fort</option>
+
+                    <option value="albert_hall">Albert Hall Museum</option>
+
+                </select>
+
+
+
+                <button id="btnHome" class="btn">Home</button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <div class="main">
+
+        <aside class="sidebar">
+
+            <div class="top-bar">
+
+                <div class="title">Online Users</div>
+
+                <div class="last-updated" id="lastUpdated">—</div>
+
+            </div>
+
+            <div id="usersList" class="users-list"></div>
+
+
+
+            <div class="controls">
+
+                <button id="btnStartShare" class="btn" style="background:linear-gradient(135deg, var(--accent), var(--accent-secondary));color:var(--bg);box-shadow:0 4px 12px rgba(0, 217, 255, 0.3);">Start
+                    Sharing</button>
+
+                <button id="btnStopShare" class="btn" style="background:var(--bg-secondary);border:2px solid var(--border-color);color:var(--text-secondary);">Stop</button>
+
+            </div>
+
+
+
+            <div class="routes-panel" id="routesPanel" aria-live="polite">
+
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+
+                    <div style="font-weight:800;color:var(--text-primary);font-size:16px;">Routes & fare estimates</div>
+
+                    <div class="routes-controls">
+
+                        <div id="btnShowAll" class="link-small">Show all</div>
+
+                        <div id="btnClearRoutes" class="link-small">Clear</div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="routesList">Select a destination to show routes.</div>
+
+
+
+                <div class="legend" id="routesLegend" style="display:none">
+
+                    <div><span class="dot" style="background:#00D9FF"></span> Recommended</div>
+
+                    <div><span class="dot" style="background:#7B2CBF"></span> Heavy traffic</div>
+
+                    <div><span class="dot" style="background:#FF006E"></span> Common user</div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="note">Search uses OpenStreetMap Nominatim; routing uses OSRM + heuristics (demo only).</div>
+
+        </aside>
+
+
+
+        <div class="map-wrap">
+
+            <div id="map"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- libs -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+
+
+    <script>
+
+        (async function () {
+
+            // ---------- Helpers ----------
+
+            const $ = id => document.getElementById(id);
+
+            const fmt = (secs) => {
+
+                if (!secs && secs !== 0) return '';
+
+                const m = Math.round(secs / 60);
+
+                return `${m} min`;
+
+            };
+
+            function km(m) { return (m / 1000).toFixed(2); }
+
+            const ROUTE_COLORS = ['#00D9FF', '#7B2CBF', '#FF006E'];
+
+
+
+            // Jaipur bounds (approx)
+
+            const jaipurBounds = L.latLngBounds(L.latLng(26.70, 75.65), L.latLng(27.05, 76.00));
+
+
+
+            // must-visit list
+
+            const MUST_VISIT = {
+
+                "hawa_mahal": { name: "Hawa Mahal", lat: 26.9239, lng: 75.8267 },
+
+                "amber_fort": { name: "Amber Fort", lat: 26.9855, lng: 75.8513 },
+
+                "city_palace": { name: "City Palace", lat: 26.9195, lng: 75.8162 },
+
+                "jantar_mantar": { name: "Jantar Mantar", lat: 26.9235, lng: 75.8245 },
+
+                "jal_mahal": { name: "Jal Mahal", lat: 26.9320, lng: 75.7910 },
+
+                "nahargarh": { name: "Nahargarh Fort", lat: 26.9486, lng: 75.8066 },
+
+                "albert_hall": { name: "Albert Hall Museum", lat: 26.9086, lng: 75.8150 }
+
+            };
+
+
+
+            // fare estimation parameters (simple demo formula)
+
+            const FARE = { base: 20, per_km: 8, per_min: 1.5 };
+
+
+
+            // ---------- map init ----------
+
+            const map = L.map('map', { zoomControl: true, minZoom: 12, maxZoom: 18 }).fitBounds(jaipurBounds);
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+            map.setMaxBounds(jaipurBounds.pad(0.02));
+
+            map.on('drag', () => { if (!jaipurBounds.pad(0.02).contains(map.getCenter())) map.panInsideBounds(jaipurBounds.pad(0.02), { animate: false }); });
+
+            map.on('zoomend', () => { if (map.getZoom() < 12) map.setZoom(12); });
+
+
+
+            // markers and layers
+
+            const markers = {}; // sid -> { circle, dot, lastLatLng, accuracy }
+
+            let routeLayers = []; // { polyline, idx, sig }
+
+            let placeMarker = null;
+
+
+
+            // ---------- socket + auth ----------
+
+            async function getUser() {
+
+                try { const res = await fetch('/api/current_user', { credentials: 'same-origin' }); if (!res.ok) return null; const j = await res.json(); return j.ok ? j.user : null; } catch (e) { return null; }
+
+            }
+
+            const user = await getUser(); if (!user) { sessionStorage.setItem('safarik_post_login_redirect', '/realtime'); location.href = '/login'; return; }
+
+            $('youName').textContent = 'You: ' + (user.name || user.email);
+
+
+
+            const socket = io({ transports: ['websocket'] });
+
+            socket.on('connect', () => socket.emit('join', { user }));
+
+
+
+            socket.on('presence', payload => {
+
+                renderUsers(payload.users || []);
+
+                $('onlineCount').textContent = 'Online: ' + (payload.users || []).length;
+
+                const present = (payload.users || []).map(u => u.sid);
+
+                Object.keys(markers).forEach(sid => { if (!present.includes(sid)) removeVisual(sid); });
+
+            });
+
+
+
+            socket.on('locations_update', list => {
+
+                (list || []).forEach(item => {
+
+                    if (!item || item.lat == null || item.lng == null) return;
+
+                    updateVisual(item.sid, item.name, item.lat, item.lng, item.ts, item.accuracy);
+
+                });
+
+                const active = (list || []).map(x => x.sid);
+
+                Object.keys(markers).forEach(sid => { if (!active.includes(sid)) removeVisual(sid); });
+
+            });
+
+
+
+            // ---------- visuals (circle + dot) ----------
+
+            function createVisual(sid, name, lat, lng, accuracy) {
+
+                const radius = (typeof accuracy === 'number') ? Math.max(accuracy, 8) : 30;
+
+                const circle = L.circle([lat, lng], { radius, color: ROUTE_COLORS[0], weight: 1, opacity: 0.28, fillColor: ROUTE_COLORS[0], fillOpacity: 0.08 }).addTo(map);
+
+                const dot = L.circleMarker([lat, lng], { radius: 6, fillColor: ROUTE_COLORS[0], color: '#fff', weight: 1, fillOpacity: 1 }).addTo(map);
+
+                dot.bindPopup(`<b>${name}</b>`);
+
+                markers[sid] = { circle, dot, lastLatLng: [lat, lng], accuracy: radius };
+
+                return markers[sid];
+
+            }
+
+            function updateVisual(sid, name, lat, lng, ts, accuracy) {
+
+                const latlng = [lat, lng];
+
+                if (!jaipurBounds.contains(latlng)) { if (markers[sid]) removeVisual(sid); return; }
+
+                if (!markers[sid]) { const o = createVisual(sid, name, lat, lng, accuracy); if (ts) o.dot.getPopup().setContent(`<b>${name}</b><br>${new Date(ts * 1000).toLocaleTimeString()}`); return; }
+
+                const obj = markers[sid]; const from = obj.lastLatLng || latlng;
+
+                animateMove(obj, from, latlng, 700);
+
+                if (typeof accuracy === 'number') { try { obj.circle.setRadius(Math.max(accuracy, 8)); obj.accuracy = Math.max(accuracy, 8); } catch (e) { } }
+
+                if (ts) try { obj.dot.getPopup().setContent(`<b>${name}</b><br>${new Date(ts * 1000).toLocaleTimeString()}`) } catch (e) { }
+
+                obj.lastLatLng = latlng;
+
+            }
+
+            function removeVisual(sid) { const obj = markers[sid]; if (!obj) return; try { map.removeLayer(obj.circle) } catch (e) { } try { map.removeLayer(obj.dot) } catch (e) { } delete markers[sid]; }
+
+
+
+            // animate move simple
+
+            function animateMove(obj, fromLatLng, toLatLng, duration = 600) {
+
+                const [fLat, fLng] = fromLatLng, [tLat, tLng] = toLatLng;
+
+                const start = Date.now();
+
+                function step() { const now = Date.now(); const t = Math.min(1, (now - start) / duration); const lat = fLat + (tLat - fLat) * t; const lng = fLng + (tLng - fLng) * t; try { obj.circle.setLatLng([lat, lng]); obj.dot.setLatLng([lat, lng]); } catch (e) { } if (t < 1) requestAnimationFrame(step); }
+
+                requestAnimationFrame(step);
+
+            }
+
+
+
+            // ---------- geolocation sharing ----------
+
+            function getPositionOnce(options = { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }) {
+
+                return new Promise((resolve, reject) => {
+
+                    if (!navigator.geolocation) return reject(new Error('no-geolocation'));
+
+                    navigator.geolocation.getCurrentPosition(pos => {
+
+                        resolve({
+
+                            lat: pos.coords.latitude,
+
+                            lng: pos.coords.longitude,
+
+                            accuracy: pos.coords.accuracy || null,
+
+                            ts: Math.floor(pos.timestamp / 1000)
+
+                        });
+
+                    }, err => reject(err), options);
+
+                });
+
+            }
+
+
+
+            let watchId = null;
+
+            $('btnStartShare').onclick = () => {
+
+                if (!navigator.geolocation) { alert('Browser does not support location.'); return; }
+
+                if (watchId !== null) return;
+
+                watchId = navigator.geolocation.watchPosition(pos => {
+
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude, accuracy = pos.coords.accuracy || null, ts = Math.floor(pos.timestamp / 1000);
+
+                    socket.emit('location_update', { lat, lng, ts, accuracy });
+
+                    updateVisual('__me', user.name || 'You', lat, lng, ts, accuracy);
+
+                    if (!window._centeredOnce && jaipurBounds.contains([lat, lng])) { map.setView([lat, lng], 14); window._centeredOnce = true; }
+
+                }, err => { console.warn(err); alert('Unable to get location: ' + err.message); }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 });
+
+            };
+
+            $('btnStopShare').onclick = () => { if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; socket.emit('location_update', { lat: null, lng: null }); removeVisual('__me'); } };
+
+
+
+            // ---------- improved Nominatim search within Jaipur (viewbox + bounded=1) ----------
+
+            async function nominatimSearch(q) {
+
+                const sw = jaipurBounds.getSouthWest();
+
+                const ne = jaipurBounds.getNorthEast();
+
+                const viewbox = `${sw.lng},${ne.lat},${ne.lng},${sw.lat}`;
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&limit=8&viewbox=${encodeURIComponent(viewbox)}&bounded=1&q=${encodeURIComponent(q)}&addressdetails=1`;
+
+                try {
+
+                    const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+
+                    if (!r.ok) return [];
+
+                    const data = await r.json();
+
+                    return data.map(d => ({
+
+                        name: d.display_name,
+
+                        lat: parseFloat(d.lat),
+
+                        lng: parseFloat(d.lon),
+
+                        type: d.type || '',
+
+                        class: d.class || '',
+
+                        address: d.address || {}
+
+                    }));
+
+                } catch (e) {
+
+                    console.warn('nominatim error', e);
+
+                    return [];
+
+                }
+
+            }
+
+
+
+            $('btnSearch').addEventListener('click', async () => {
+
+                const q = $('searchBox').value.trim();
+
+                if (!q) { alert('Type place name to search (Jaipur)'); return; }
+
+                const results = await nominatimSearch(q);
+
+                if (!results.length) { alert('No results found in Jaipur. Try different query.'); return; }
+
+                if (results.length === 1) { showPlace(results[0].name, results[0].lat, results[0].lng); return; }
+
+                const pick = prompt('Multiple results found. Pick index:\n' + results.map((r, i) => `${i + 1}. ${r.name}`).join('\n'));
+
+                const idx = parseInt(pick || '') - 1;
+
+                if (Number.isInteger(idx) && idx >= 0 && idx < results.length) showPlace(results[idx].name, results[idx].lat, results[idx].lng);
+
+            });
+
+
+
+            // ---------- geo helpers used for via candidates ----------
+
+            function distanceBetween(a, b) {
+
+                const toRad = v => v * Math.PI / 180;
+
+                const R = 6371000;
+
+                const dLat = toRad(b[0] - a[0]), dLon = toRad(b[1] - a[1]);
+
+                const lat1 = toRad(a[0]), lat2 = toRad(b[0]);
+
+                const aa = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+                const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+
+                return R * c;
+
+            }
+
+
+
+            function destinationPoint([lat, lng], bearingDeg, distanceMeters) {
+
+                const R = 6378137;
+
+                const toRad = v => v * Math.PI / 180;
+
+                const toDeg = v => v * 180 / Math.PI;
+
+                const br = toRad(bearingDeg);
+
+                const φ1 = toRad(lat), λ1 = toRad(lng);
+
+                const δ = distanceMeters / R;
+
+                const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(br));
+
+                const λ2 = λ1 + Math.atan2(Math.sin(br) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+
+                return [toDeg(φ2), toDeg(λ2)];
+
+            }
+
+
+
+            function midpointFraction(a, b, t) {
+
+                return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
+            }
+
+
+
+            function generateViaCandidates(origin, dest) {
+
+                const fractions = [0.25, 0.5, 0.75];
+
+                const offsets = [200, -200, 500, -500];
+
+                const candidates = [];
+
+                const toRad = v => v * Math.PI / 180;
+
+                const lat1 = toRad(origin[0]), lon1 = toRad(origin[1]);
+
+                const lat2 = toRad(dest[0]), lon2 = toRad(dest[1]);
+
+                const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
+
+                const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
+
+                const bearing = Math.atan2(y, x) * 180 / Math.PI;
+
+                const perpLeft = (bearing + 90) % 360;
+
+                const perpRight = (bearing - 90 + 360) % 360;
+
+
+
+                for (const f of fractions) {
+
+                    const mid = midpointFraction(origin, dest, f);
+
+                    for (const off of offsets) {
+
+                        const side = off >= 0 ? perpLeft : perpRight;
+
+                        const candidate = destinationPoint(mid, side, Math.abs(off));
+
+                        if (jaipurBounds.contains(candidate)) candidates.push(candidate);
+
+                    }
+
+                }
+
+                const uniq = [];
+
+                for (const c of candidates) {
+
+                    if (!uniq.some(u => distanceBetween(u, c) < 40)) uniq.push(c);
+
+                }
+
+                return uniq;
+
+            }
+
+
+
+            function routeSignature(routeGeojsonCoords) {
+
+                let s = 0;
+
+                for (let i = 0; i < routeGeojsonCoords.length; i += Math.max(1, Math.floor(routeGeojsonCoords.length / 30))) {
+
+                    s += Math.round(routeGeojsonCoords[i][0] * 10000) + Math.round(routeGeojsonCoords[i][1] * 10000);
+
+                }
+
+                return s;
+
+            }
+
+
+
+            // ---------- robust origin resolver ----------
+
+            async function getOrigin() {
+
+                if (markers['__me'] && markers['__me'].lastLatLng) return markers['__me'].lastLatLng.slice();
+
+                for (const sid in markers) {
+
+                    if (sid === '__me') continue;
+
+                    const obj = markers[sid];
+
+                    try {
+
+                        const popup = obj.dot && obj.dot.getPopup && obj.dot.getPopup().getContent ? obj.dot.getPopup().getContent() : '';
+
+                        if (popup && (popup.indexOf(user.name || user.email) !== -1)) return obj.lastLatLng.slice();
+
+                    } catch (e) { }
+
+                }
+
+                try {
+
+                    const pos = await getPositionOnce();
+
+                    return [pos.lat, pos.lng];
+
+                } catch (err) {
+
+                    console.warn('Could not obtain one-shot geolocation', err);
+
+                    return null;
+
+                }
+
+            }
+
+
+
+            // ---------- showPlace: select destination and attempt to route ----------
+
+            async function showPlace(name, lat, lng) {
+
+                if (placeMarker) { try { map.removeLayer(placeMarker); } catch (e) { } placeMarker = null; }
+
+                placeMarker = L.marker([lat, lng]).addTo(map).bindPopup(`<b>${name}</b>`).openPopup();
+
+
+
+                if (!jaipurBounds.contains([lat, lng])) {
+
+                    alert('Place is outside Jaipur bounds — routes not shown.');
+
+                    map.setView(jaipurBounds.getCenter(), 13);
+
+                    return;
+
+                }
+
+
+
+                const originLL = await getOrigin();
+
+                if (!originLL) {
+
+                    const useClick = confirm('Your live location is not available.\nChoose OK to allow one-time location access now, or Cancel to manually set origin on the map.');
+
+                    if (useClick) {
+
+                        const pos = await getOrigin();
+
+                        if (!pos) { alert('Unable to get location. Start sharing (Start Sharing) or allow location access.'); return; }
+
+                        await fetchRoutesAndDraw(pos, [lat, lng], name);
+
+                        return;
+
+                    } else {
+
+                        alert('Click on the map to set your origin point. After clicking, select the place again.');
+
+                        const onClick = (ev) => {
+
+                            const p = ev.latlng;
+
+                            updateVisual('__me', user.name || 'You', p.lat, p.lng, Math.floor(Date.now() / 1000), null);
+
+                            map.off('click', onClick);
+
+                            setTimeout(() => { fetchRoutesAndDraw([p.lat, p.lng], [lat, lng], name); }, 300);
+
+                        };
+
+                        map.on('click', onClick);
+
+                        return;
+
+                    }
+
+                } else {
+
+                    await fetchRoutesAndDraw(originLL, [lat, lng], name);
+
+                }
+
+            }
+
+
+
+            // ---------- routing that tries alternatives, fallback, then via candidates ----------
+
+            async function fetchRoutesAndDraw(origin, dest, destName) {
+
+                clearRoutes();
+
+                $('routesList').innerHTML = 'Loading routes...';
+
+                $('routesLegend').style.display = 'none';
+
+
+
+                const originLat = origin[0], originLng = origin[1];
+
+                const destLat = dest[0], destLng = dest[1];
+
+
+
+                async function callOsrm(baseUrl, coordsString, params = 'alternatives=true&overview=full&geometries=geojson&annotations=duration,distance') {
+
+                    const url = `${baseUrl}/route/v1/driving/${coordsString}?${params}`;
+
+                    const res = await fetch(url);
+
+                    if (!res.ok) throw new Error('bad-response-' + res.status);
+
+                    const json = await res.json();
+
+                    if (!json || !json.routes || json.routes.length === 0) return [];
+
+                    return json.routes;
+
+                }
+
+
+
+                let collected = [];
+
+                let signatures = new Set();
+
+
+
+                // primary: origin;dest
+
+                try {
+
+                    const base = 'https://router.project-osrm.org';
+
+                    const coords = `${originLng},${originLat};${destLng},${destLat}`;
+
+                    console.debug('OSRM primary request', coords);
+
+                    const primaryRoutes = await callOsrm(base, coords);
+
+                    (primaryRoutes || []).slice(0, 3).forEach(r => {
+
+                        const coordsLatLng = (r.geometry && r.geometry.coordinates) ? r.geometry.coordinates.map(c => [c[1], c[0]]) : [];
+
+                        if (!coordsLatLng.length) return;
+
+                        const sig = routeSignature(coordsLatLng);
+
+                        if (!signatures.has(sig)) { signatures.add(sig); collected.push({ r, coordsLatLng, sig }); }
+
+                    });
+
+                } catch (e) {
+
+                    console.warn('Primary OSRM error', e);
+
+                }
+
+
+
+                // fallback engine
+
+                if (collected.length < 3) {
+
+                    try {
+
+                        const base = 'https://routing.openstreetmap.de';
+
+                        const coords = `${originLng},${originLat};${destLng},${destLat}`;
+
+                        console.debug('OSRM fallback request', coords);
+
+                        const fallbackRoutes = await callOsrm(base, coords);
+
+                        (fallbackRoutes || []).slice(0, 3).forEach(r => {
+
+                            const coordsLatLng = (r.geometry && r.geometry.coordinates) ? r.geometry.coordinates.map(c => [c[1], c[0]]) : [];
+
+                            if (!coordsLatLng.length) return;
+
+                            const sig = routeSignature(coordsLatLng);
+
+                            if (!signatures.has(sig)) { signatures.add(sig); collected.push({ r, coordsLatLng, sig }); }
+
+                        });
+
+                    } catch (e) {
+
+                        console.warn('Fallback router error', e);
+
+                    }
+
+                }
+
+
+
+                // via candidates to generate additional alternatives
+
+                if (collected.length < 3) {
+
+                    const viaCandidates = generateViaCandidates([originLat, originLng], [destLat, destLng]);
+
+                    console.debug('Via candidates', viaCandidates);
+
+                    for (let i = 0; i < viaCandidates.length && collected.length < 3; i++) {
+
+                        const v = viaCandidates[i];
+
+                        const coordsString = `${originLng},${originLat};${v[1]},${v[0]};${destLng},${destLat}`;
+
+                        try {
+
+                            const rts = await callOsrm('https://router.project-osrm.org', coordsString, 'overview=full&geometries=geojson&annotations=duration,distance');
+
+                            if (rts && rts.length) {
+
+                                const newR = rts[0];
+
+                                const coordsLatLng = (newR.geometry && newR.geometry.coordinates) ? newR.geometry.coordinates.map(c => [c[1], c[0]]) : [];
+
+                                if (coordsLatLng.length) {
+
+                                    const sig = routeSignature(coordsLatLng);
+
+                                    if (!signatures.has(sig)) { signatures.add(sig); collected.push({ r: newR, coordsLatLng, sig }); }
+
+                                }
+
+                            }
+
+                        } catch (err) {
+
+                            console.warn('via primary failed for', v, err);
+
+                            try {
+
+                                const rts2 = await callOsrm('https://routing.openstreetmap.de', coordsString, 'overview=full&geometries=geojson&annotations=duration,distance');
+
+                                if (rts2 && rts2.length) {
+
+                                    const newR = rts2[0];
+
+                                    const coordsLatLng = (newR.geometry && newR.geometry.coordinates) ? newR.geometry.coordinates.map(c => [c[1], c[0]]) : [];
+
+                                    if (coordsLatLng.length) {
+
+                                        const sig = routeSignature(coordsLatLng);
+
+                                        if (!signatures.has(sig)) { signatures.add(sig); collected.push({ r: newR, coordsLatLng, sig }); }
+
+                                    }
+
+                                }
+
+                            } catch (e2) { console.warn('via fallback failed', e2); }
+
+                        }
+
+                    }
+
+                }
+
+
+
+                collected = collected.slice(0, 3);
+
+                if (!collected.length) {
+
+                    $('routesList').innerHTML = 'No routes available between these points.';
+
+                    return;
+
+                }
+
+
+
+                // build UI list with explicit labels: Recommended, Heavy traffic, Common user
+
+                let html = '';
+
+                // reset routeLayers
+
+                routeLayers = [];
+
+
+
+                collected.forEach((obj, idx) => {
+
+                    const r = obj.r;
+
+                    const coordsLatLng = obj.coordsLatLng;
+
+                    const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
+
+                    const poly = L.polyline(coordsLatLng, { color, weight: 6 - Math.min(3, idx), opacity: 0.92 }).addTo(map);
+
+                    // store meta
+
+                    const meta = { poly, idx, sig: obj.sig, coordsLatLng, visible: true };
+
+                    routeLayers.push(meta);
+
+
+
+                    const distance_m = r.distance || (r.summary && r.summary.distance) || 0;
+
+                    const duration_s = r.duration || (r.summary && r.summary.duration) || 0;
+
+                    const estimateFare = Math.max(FARE.base, Math.round(FARE.base + FARE.per_km * (distance_m / 1000) + FARE.per_min * (duration_s / 60)));
+
+
+
+                    // label mapping
+
+                    const label = (idx === 0) ? 'Recommended' : (idx === 1) ? 'Heavy traffic' : 'Common user';
+
+                    const badgeColor = (idx === 0) ? 'badge' : (idx === 1) ? 'badge' : 'badge';
+
+
+
+                    html += `<div class="route-row" data-idx="${idx}" style="border-left-color:${color}">
+
+                  <div>
+
+                    <div class="route-info"><strong>${label}</strong> <span style="margin-left:8px;color:${color};font-weight:700">${label === 'Heavy traffic' ? '⚠️' : ''}</span></div>
+
+                    <div class="route-meta">${fmt(duration_s)} · ${km(distance_m)} km</div>
+
+                  </div>
+
+                  <div style="text-align:right">
+
+                    <div class="route-price">₹${estimateFare}</div>
+
+                    <div class="route-meta" style="text-align:right">Est. fare</div>
+
+                  </div>
+
+                </div>`;
+
+
+
+                    // add click on polyline to select
+
+                    poly.on('click', () => selectRoute(idx));
+
+                });
+
+
+
+                $('routesList').innerHTML = html;
+
+                $('routesLegend').style.display = 'flex';
+
+
+
+                // wire up click handlers for rows
+
+                document.querySelectorAll('.route-row').forEach(el => {
+
+                    el.addEventListener('click', (ev) => {
+
+                        const idx = parseInt(el.getAttribute('data-idx'));
+
+                        selectRoute(idx);
+
+                    });
+
+                });
+
+
+
+                // fit to all routes + origin/dest
+
+                const allCoords = routeLayers.flatMap(l => l.coordsLatLng.map(c => L.latLng(c[0], c[1])));
+
+                allCoords.push(L.latLng(originLat, originLng)); allCoords.push(L.latLng(destLat, destLng));
+
+                const bounds = L.latLngBounds(allCoords);
+
+                map.fitBounds(bounds.pad(0.12));
+
+
+
+                console.debug('Collected routes count:', collected.length);
+
+            }
+
+
+
+            function clearRoutes() { routeLayers.forEach(l => { try { map.removeLayer(l.poly); } catch (e) { } }); routeLayers = []; $('routesList').innerHTML = ''; $('routesLegend').style.display = 'none'; }
+
+            function removeAllPlaceMarker() { if (placeMarker) { try { map.removeLayer(placeMarker); } catch (e) { } placeMarker = null; } }
+
+
+
+            // selectRoute: keeps only selected route on map (like Google Maps)
+
+            function selectRoute(idx) {
+
+                // deselect UI
+
+                document.querySelectorAll('.route-row').forEach(r => r.classList.remove('selected'));
+
+                const selectedRow = document.querySelector(`.route-row[data-idx='${idx}']`);
+
+                if (selectedRow) selectedRow.classList.add('selected');
+
+
+
+                routeLayers.forEach((meta) => {
+
+                    try {
+
+                        if (meta.idx === idx) {
+
+                            if (!meta.visible) { meta.poly.addTo(map); meta.visible = true; }
+
+                            // highlight style
+
+                            meta.poly.setStyle({ weight: 8, opacity: 1 });
+
+                            // fit map to this route
+
+                            const latlngs = meta.coordsLatLng.map(c => L.latLng(c[0], c[1]));
+
+                            const b = L.latLngBounds(latlngs);
+
+                            map.fitBounds(b.pad(0.12));
+
+                        } else {
+
+                            if (meta.visible) { try { map.removeLayer(meta.poly); } catch (e) { } meta.visible = false; }
+
+                        }
+
+                    } catch (e) { }
+
+                });
+
+            }
+
+
+
+            // show all
+
+            $('btnShowAll').addEventListener('click', () => {
+
+                document.querySelectorAll('.route-row').forEach(r => r.classList.remove('selected'));
+
+                routeLayers.forEach(meta => { if (!meta.visible) { meta.poly.addTo(map); meta.visible = true; } meta.poly.setStyle({ weight: 6, opacity: 0.92 }); });
+
+                // fit to all
+
+                const allCoords = routeLayers.flatMap(l => l.coordsLatLng.map(c => L.latLng(c[0], c[1])));
+
+                if (allCoords.length) { const bounds = L.latLngBounds(allCoords); map.fitBounds(bounds.pad(0.12)); }
+
+            });
+
+
+
+            $('btnClearRoutes').addEventListener('click', () => { clearRoutes(); removeAllPlaceMarker(); });
+
+
+
+            // ---------- sidebar user list ----------
+
+            function renderUsers(users) {
+
+                const box = $('usersList'); box.innerHTML = ''; $('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+                users.forEach(u => {
+
+                    const div = document.createElement('div'); div.className = 'user-row';
+
+                    div.innerHTML = `<div><div class="user-name">${u.name}</div><div class="user-loc">${u.location ? `Lat ${u.location.lat.toFixed(4)}, Lng ${u.location.lng.toFixed(4)}` : "<span style='color:#aaa'>no location</span>"}</div></div><div class="small">${u.location ? new Date(u.location.ts * 1000).toLocaleTimeString() : ""}</div>`;
+
+                    box.appendChild(div);
+
+                });
+
+            }
+
+
+
+            // ---------- search box enter handler ----------
+
+            $('searchBox').addEventListener('keypress', e => { if (e.key === 'Enter') { $('btnSearch').click(); } });
+
+
+
+            // ---------- Must-visit wiring ----------
+
+            $('placeSelect').addEventListener('change', ev => { const k = ev.target.value; if (!k) return; const p = MUST_VISIT[k]; if (p) showPlace(p.name, p.lat, p.lng); });
+
+
+
+            // ---------- Home ----------
+
+            $('btnHome').addEventListener('click', () => { 
+                window.location.href = "{{ url_for('index') }}";
+            });
+
+
+
+            // ---------- remove routes when clicking map ----------
+
+            map.on('click', () => { clearRoutes(); });
+
+
+
+            // ---------- initial fit ----------
+
+            map.fitBounds(jaipurBounds, { padding: [40, 40] });
+
+
+
+        })();
+
+    </script>
+
+</body>
+
+
+
+</html>

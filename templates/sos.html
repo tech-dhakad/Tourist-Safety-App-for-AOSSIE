@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raahi — SOS Emergency & Live Tracking</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            /* Theme Variables (Assuming these match your index.html/app theme) */
+            --bg: #f6f9fc;
+            --surface: #ffffff;
+            --accent: #0b76ff; /* Primary/Accent Color */
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --muted: #6b7280;
+            --text-dark: #0f2138;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(180deg, var(--bg), var(--surface));
+            color: var(--text-dark);
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 18px 25px; /* Slightly wider padding */
+            background: var(--surface);
+            box-shadow: 0 4px 12px rgba(16, 24, 40, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .map-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95); /* Slightly less transparency */
+            padding: 20px; /* Increased padding */
+            border-radius: 16px; /* Smoother corners */
+            box-shadow: 0 10px 30px rgba(16, 24, 40, 0.2);
+            max-width: 320px;
+            min-width: 280px;
+            border: 1px solid #e0e6f0; /* Soft border */
+        }
+        
+        /* --- Back Button Styling --- */
+        .back-to-home {
+            display: block;
+            text-align: left; /* Aligned to left of the control panel */
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .back-to-home:hover {
+            color: var(--danger); /* Hover effect */
+        }
+        /* --- Emergency Numbers Styling --- */
+        .emergency-numbers {
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 1px solid #ffcccc; /* Lighter danger border */
+            border-radius: 8px;
+            background: #fff8f8; /* Light danger background */
+        }
+        .emergency-numbers h4 {
+             font-size: 15px;
+             color: var(--danger);
+             margin: 0 0 8px 0;
+             border-bottom: 1px dashed #fcd2d2;
+             padding-bottom: 5px;
+        }
+        .emergency-numbers ul li a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .btn-sos {
+            width: 100%;
+            padding: 18px 20px; /* Slightly taller button */
+            border: none;
+            border-radius: 12px; /* Matched to control panel radius */
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #btnStartSos {
+            background: var(--danger);
+            color: white;
+            animation: pulse-red 1.5s infinite;
+        }
+        #btnStartSos:hover {
+            background: var(--danger-hover);
+        }
+
+        #btnResolveSos {
+            background: var(--success);
+            color: white;
+            margin-top: 15px; /* Increased margin */
+            display: none;
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        /* ... (rest of status CSS remains the same) ... */
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <header>
+            <h1>Raahi SOS & Tracking</h1>
+            <div id="userInfo">Logged in as: -</div>
+        </header>
+
+        <div class="map-wrap">
+            <div id="map"></div>
+            
+            <div class="control-panel">
+                <a href="{{ url_for('index') }}" class="back-to-home">← Home / Landing Page</a>
+
+                <div class="emergency-numbers">
+                    <h4>Tatkaal Madad Sankhya (Emergency Numbers)</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
+                        <li><span style="font-weight: 700;">Police:</span> <a href="tel:100">100</a></li>
+                        <li><span style="font-weight: 700;">Ambulance/Hospital:</span> <a href="tel:108">108</a></li>
+                        <li><span style="font-weight: 700;">Fire:</span> <a href="tel:101">101</a></li>
+                        <li><span style="font-weight: 700;">Women's Helpline:</span> <a href="tel:1091">1091</a></li>
+                    </ul>
+                </div>
+                <div id="sosInitial">
+                    <button id="btnStartSos" class="btn-sos">🚨 SOS EMERGENCY</button>
+                    <div class="status-message" style="margin-top:10px; color:var(--muted); font-size:13px;">Press and hold for 3 seconds to activate.</div>
+                    <div class="status-message" style="margin-top:10px; color:var(--danger); font-size:13px; font-weight:700;">Warning: This instantly alerts authorities (Mock).</div>
+                </div>
+                
+                <div id="sosActive" style="display:none;">
+                    <div id="activeStatusMsg" class="status-message status-danger">SOS ACTIVE: Help is on the way.</div>
+                    <button id="btnResolveSos" class="btn-sos">I AM SAFE (Resolve SOS)</button>
+                </div>
+                
+                <div id="sosResolved" style="display:none;">
+                    <div id="resolvedStatusMsg" class="status-message status-success">SOS Resolved.</div>
+                    <div id="auditLinkArea" style="margin-top: 10px; text-align: center;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script>
+        (async function () {
+            const $ = id => document.getElementById(id);
+            
+            // --- Map Init ---
+            const map = L.map('map', { zoomControl: true }).setView([26.9124, 75.7873], 13); 
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+            let myMarker = null;
+            let locationWatcher = null;
+            let activeSosId = null;
+            let currentUserId = null;
+            let isSosMode = false; 
+            let emergencyMarkers = L.layerGroup().addTo(map);
+
+            // --- Geolocation Sharing ---
+            function startLocationWatcher(sosMode = false) {
+                isSosMode = sosMode;
+                if (locationWatcher !== null) {
+                    navigator.geolocation.clearWatch(locationWatcher);
+                    locationWatcher = null;
+                }
+
+                const options = { enableHighAccuracy: sosMode, maximumAge: sosMode ? 1000 : 5000, timeout: 10000 };
+                
+                locationWatcher = navigator.geolocation.watchPosition(pos => {
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude, accuracy = pos.coords.accuracy || null, ts = Math.floor(pos.timestamp / 1000);
+                    
+                    socket.emit('location_update', { lat, lng, ts, accuracy });
+                    
+                    const latlng = [lat, lng];
+                    const color = sosMode ? 'red' : 'blue';
+                    
+                    if (!myMarker) {
+                        myMarker = L.circleMarker(latlng, { radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 1 }).addTo(map);
+                        // User object is defined later, assuming it's available via closure
+                        myMarker.bindPopup(`<b>You (${user.name || 'User'})</b>`); 
+                    } else {
+                        myMarker.setLatLng(latlng);
+                        myMarker.setStyle({ fillColor: color });
+                    }
+                    map.setView(latlng, 15);
+                }, err => { console.error('Location Error:', err); }, options);
+            }
+
+            function stopLocationWatcher() {
+                if (locationWatcher !== null) {
+                    navigator.geolocation.clearWatch(locationWatcher);
+                    locationWatcher = null;
+                    socket.emit('location_update', { lat: null, lng: null });
+                }
+            }
+            
+            // --- SOS UI State Management ---
+            function setSosState(state) {
+                $('sosInitial').style.display = 'none';
+                $('sosActive').style.display = 'none';
+                $('sosResolved').style.display = 'none';
+                
+                if (state === 'ACTIVE') {
+                    $('sosActive').style.display = 'block';
+                    startLocationWatcher(true); 
+                    document.title = "🚨 SOS ACTIVE - Raahi";
+                } else if (state === 'RESOLVED') {
+                    $('sosResolved').style.display = 'block';
+                    startLocationWatcher(false); 
+                    document.title = "SOS Resolved - Raahi";
+                    emergencyMarkers.clearLayers(); 
+                } else { // INITIAL
+                    $('sosInitial').style.display = 'block';
+                    startLocationWatcher(false); 
+                    document.title = "Raahi - SOS Emergency";
+                    emergencyMarkers.clearLayers(); 
+                }
+            }
+
+            // --- Authentication & Socket Init ---
+            async function getUser() {
+                try {
+                    const res = await fetch('/api/current_user', { credentials: 'same-origin' });
+                    if (!res.ok) return null;
+                    const j = await res.json();
+                    return j.ok ? j.user : null;
+                } catch (e) {
+                    return null;
+                }
+            }
+            
+            const user = await getUser();
+            if (!user) {
+                sessionStorage.setItem('safarik_post_login_redirect', '/sos');
+                location.href = '/login';
+                return;
+            }
+            $('userInfo').textContent = `Logged in as: ${user.name || user.email}`;
+            currentUserId = user.id;
+
+            const socket = io({ transports: ['websocket'] });
+            socket.on('connect', () => {
+                socket.emit('join', { user });
+                startLocationWatcher(false); 
+            });
+            
+            // --- SOS Socket Handlers ---
+            socket.on('sos_started', (payload) => {
+                activeSosId = payload.sos_id;
+                socket.emit('join', { room: activeSosId, user }); 
+                $('activeStatusMsg').textContent = `🚨 SOS ACTIVE (${payload.sos_id.substring(4)}): Help is on the way!`;
+                setSosState('ACTIVE');
+                
+                // --- Display Nearby Emergency Places ---
+                emergencyMarkers.clearLayers(); 
+                const nearbyPlaces = payload.places || [];
+                
+                nearbyPlaces.forEach(place => {
+                    let iconHtml = place.type === 'Hospital' ? '🏥' : '🚓';
+                    let markerColor = place.type === 'Hospital' ? 'blue' : 'orange';
+                    
+                    let customIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color: ${markerColor}; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; text-align: center; border: 2px solid white; font-size: 16px;">${iconHtml}</div>`,
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 30]
+                    });
+
+                    let marker = L.marker([place.lat, place.lng], { icon: customIcon }).addTo(emergencyMarkers);
+                    marker.bindPopup(`<b>${place.name}</b><br>Type: ${place.type}`).openPopup();
+                });
+                // --- End Display Nearby Places ---
+            });
+            
+            socket.on('sos_resolved', (payload) => {
+                $('resolvedStatusMsg').textContent = `SOS Resolved (${payload.sos_id.substring(4)}). Safety Confirmed.`;
+                setSosState('RESOLVED');
+                if (activeSosId) {
+                     // Client could send a 'leave' event here if needed, but server removes user from ACTIVE_SOS_ROOMS
+                }
+                activeSosId = null;
+            });
+
+            socket.on('sos_audit_finalized', (payload) => {
+                $('resolvedStatusMsg').textContent = `SOS Resolved. Audit Trail Secured!`;
+                $('auditLinkArea').innerHTML = `<a href="${payload.audit_link}" target="_blank" style="color:var(--accent); font-weight:700;">View Immutable Audit Record</a>`;
+                console.log('Audit Finalized:', payload.audit_link);
+            });
+
+            socket.on('sos_error', (payload) => {
+                alert('SOS Error: ' + payload.message);
+                setSosState('INITIAL');
+            });
+            
+            // --- SOS Button Logic (Press and Hold) ---
+            let pressTimer;
+            const btnSos = $('btnStartSos');
+            const holdDuration = 3000; 
+
+            const startPress = () => {
+                if (activeSosId) return;
+                btnSos.style.background = varColor('--danger-hover');
+                
+                pressTimer = setTimeout(() => {
+                    if (!activeSosId) {
+                        navigator.geolocation.getCurrentPosition(pos => {
+                            const lat = pos.coords.latitude, lng = pos.coords.longitude, ts = Math.floor(pos.timestamp / 1000);
+                            socket.emit('sos_alert', { lat, lng, ts, user_id: currentUserId });
+                            btnSos.style.background = varColor('--danger'); 
+                        }, err => {
+                            alert('Cannot get location to start SOS. Check permissions.');
+                            btnSos.style.background = varColor('--danger'); 
+                        }, { enableHighAccuracy: true, timeout: 5000 });
+                    }
+                }, holdDuration); 
+
+                btnSos.addEventListener('contextmenu', e => e.preventDefault());
+            };
+
+            const cancelPress = () => {
+                clearTimeout(pressTimer);
+                btnSos.style.background = varColor('--danger'); 
+            };
+
+            btnSos.addEventListener('mousedown', startPress);
+            btnSos.addEventListener('mouseup', cancelPress);
+            btnSos.addEventListener('mouseleave', cancelPress);
+            btnSos.addEventListener('touchstart', startPress);
+            btnSos.addEventListener('touchend', cancelPress);
+            btnSos.addEventListener('touchcancel', cancelPress);
+            
+            $('btnResolveSos').addEventListener('click', () => {
+                if (activeSosId) {
+                    socket.emit('sos_resolve', { sos_id: activeSosId, user_id: currentUserId });
+                }
+            });
+
+            setSosState('INITIAL');
+            
+            function varColor(name){
+                return getComputedStyle(document.documentElement).getPropertyValue(name) || '#ef4444';
+            }
+
+        })();
+    </script>
+</body>
+</html>

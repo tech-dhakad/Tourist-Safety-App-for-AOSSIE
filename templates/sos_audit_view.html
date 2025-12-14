@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SOS Audit Record - {{ data.id }}</title>
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --surface: #ffffff;
+            --accent: #0b76ff;
+            --success: #22c55e;
+            --muted: #6b7280;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #0f2138;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 90%;
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            border-bottom: 2px solid #f0f4f8;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            color: #0f2138;
+        }
+
+        .proof-box {
+            background: #eef2f8;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .proof-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .proof-label {
+            font-weight: 700;
+            color: #334155;
+            width: 40%;
+        }
+
+        .proof-value {
+            width: 60%;
+            font-family: monospace;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            color: #0f2138;
+        }
+
+        .note {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fffbe6;
+            border: 1px solid #fde047;
+            color: #78350f;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            font-weight: 700;
+            color: var(--muted);
+            width: 45%;
+        }
+        
+        .status-resolved {
+            color: var(--success);
+            font-weight: 800;
+        }
+        
+        .location-hash {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✅ SOS Audit Record Finalized</h2>
+        <p>This record proves the existence and integrity of the SOS event **{{ data.id }}** on the immutable public ledger.</p>
+
+        <h3>Emergency Summary</h3>
+        <table class="data-table">
+            <tr><th>Status</th><td class="status-resolved">{{ data.status }}</td></tr>
+            <tr><th>User</th><td>{{ data.user_name }}</td></tr>
+            <tr><th>Start Time</th><td>{{ data.audit_record.audit_summary.start_ts | timestamp_to_date }}</td></tr>
+            <tr><th>End Time</th><td>{{ data.audit_record.audit_summary.end_ts | timestamp_to_date }}</td></tr>
+            <tr><th>Total Duration</th><td>{{ data.audit_record.audit_summary.duration_s }} seconds</td></tr>
+            <tr><th>Location Log Count</th><td>{{ data.location_log | length }} updates</td></tr>
+        </table>
+        
+        <div class="note">
+            **SOS Audit Trail:** This summary (Start/End time, Duration, and Location Log Hash) was submitted to the decentralized network to ensure no tampering is possible.
+        </div>
+
+        <h3>🔗 Immutable Blockchain Proof</h3>
+        <div class="proof-box">
+            <div class="proof-row">
+                <div class="proof-label">Audit Data Hash (CID Mock):</div>
+                <div class="proof-value">{{ data.audit_record.audit_cid_mock }}</div>
+            </div>
+            <div class="proof-row">
+                <div class="proof-label">Transaction Hash (Tx):</div>
+                <div class="proof-value">{{ data.audit_record.tx_hash[:10] }}...{{ data.audit_record.tx_hash[-8:] }}</div>
+            </div>
+            <div class="proof-row">
+                <div class="proof-label">Chain Network:</div>
+                <div class="proof-value">{{ data.audit_record.chain_name }}</div>
+            </div>
+            <div class="proof-row">
+                <div class="proof-label">Location Log Integrity Hash:</div>
+                <div class="proof-value location-hash">{{ data.audit_record.audit_summary.location_log_hash }}</div>
+            </div>
+        </div>
+        
+        <a href="{{ url_for('index') }}" class="btn-back">Go to Home</a>
+        
+    </div>
+</body>
+</html>

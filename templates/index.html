@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raahi — Travel & Explore</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300,400,600,700&family=Inter:wght@300,400,600,700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            /* DARK THEME COLORS - Modern & Attractive */
+            --bg: #0F0F1E;
+            --bg-secondary: #1A1A2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8D1;
+            --text-muted: #8B8BA7;
+            --accent: #00D9FF;
+            --accent-secondary: #7B2CBF;
+            --accent-tertiary: #FF006E;
+            --card-bg: #16213E;
+            --card-hover: #1E2749;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --card-hover-shadow: 0 12px 48px rgba(0, 217, 255, 0.3);
+            --border-color: rgba(0, 217, 255, 0.2);
+            --max-width: 1280px;
+        }
+
+        /* reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            font-family: "Poppins", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(123, 44, 191, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* container */
+        .page {
+            width: 92%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* HEADER */
+        header {
+            padding: 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 100;
+            background: rgba(22, 33, 62, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            border-radius: 0 0 24px 24px;
+            padding: 20px 40px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            height: 150px;
+            margin-left: -50px;
+            /* logo placeholder */
+        }
+
+        .brand h1 {
+            font-family: "Playfair Display", serif;
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00D9FF 0%, #7B2CBF 50%, #FF006E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-left: -100px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        nav ul li {
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 0;
+        }
+
+        nav ul li::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        nav ul li:hover {
+            color: var(--accent);
+        }
+
+        nav ul li:hover::after {
+            width: 100%;
+        }
+
+        /* make anchor links inside nav inherit styles */
+        nav ul li a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* nav-right */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-outline {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            background: transparent;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--accent);
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background: var(--accent);
+            color: var(--bg);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+        }
+
+        /* HERO */
+        .hero {
+            position: relative;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            padding: 60px 0;
+            min-height: 600px;
+            margin-top: 20px;
+        }
+
+        /* cream decorative (Adjusted for dark theme) */
+        .hero-cream {
+            position: absolute;
+            top: -250px;
+            right: -205px;
+            width: 700px;
+            max-width: none;
+            pointer-events: none;
+            z-index: 1;
+            /* Replaced drop-shadow with a dark-theme friendly glow or removed if unnecessary */
+            filter: drop-shadow(0 0 40px rgba(0, 255, 255, 0.3));
+            /* Soft Aqua Glow */
+            opacity: 0.4;
+        }
+
+        /* hero left */
+        .hero-left {
+            width: 52%;
+            z-index: 2;
+            position: relative;
+            padding-right: 12px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* headline */
+        .headline {
+            font-family: "Playfair Display", serif;
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 3;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+        }
+
+        /* outline image under headline (will need dark theme image replacement) */
+        .headline-outline {
+            position: absolute;
+            left: 40px;
+            top: 78px;
+            width: 260px;
+            pointer-events: none;
+            opacity: 0.98;
+            z-index: 2;
+            transform: translateY(-6px);
+            filter: invert(100%) hue-rotate(180deg) saturate(200%);
+            /* Attempt to make outline light/aqua */
+            opacity: 0.6;
+        }
+
+        /* subtext & CTAs */
+        .subtext {
+            color: var(--text-secondary);
+            font-size: 18px;
+            max-width: 540px;
+            margin-bottom: 32px;
+            line-height: 1.8;
+        }
+
+        .actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            color: var(--bg);
+            padding: 16px 32px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 217, 255, 0.6);
+            background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent) 100%);
+        }
+
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .play {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .play:hover {
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
+        }
+
+        /* hero right */
+        .hero-right {
+            width: 46%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            z-index: 5;
+            margin-right: -30px;
+        }
+
+        .hero-girl {
+            width: 650px;
+            max-width: none;
+            filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.15));
+            z-index: 6;
+            transition: transform 0.5s ease;
+        }
+
+        .hero-right:hover .hero-girl {
+            transform: scale(1.02);
+        }
+
+        /* SERVICES */
+        .services {
+            margin-top: 46px;
+            text-align: center;
+        }
+
+        .services h2 {
+            font-family: "Playfair Display", serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .service-sub {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .service-grid {
+            display: flex;
+            gap: 22px;
+            margin-top: 30px;
+            justify-content: space-between;
+        }
+
+        /* Modern Card Design - Dark Theme */
+        .card {
+            width: 23%;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: left;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            background: var(--card-hover);
+            border-color: var(--accent);
+        }
+
+        .card .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.15) 0%, rgba(123, 44, 191, 0.15) 100%);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .card:hover .icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.3) 0%, rgba(123, 44, 191, 0.3) 100%);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .card .icon img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            /* Optional: invert image if it's light on dark, or use dark icons */
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* DESTINATIONS */
+        .top-dest {
+            margin-top: 86px;
+            text-align: center;
+        }
+
+        .top-dest h2 {
+            font-family: "Playfair Display";
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .dest-grid {
+            display: flex;
+            gap: 22px;
+            margin-top: 24px;
+        }
+
+        .dest-card {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dest-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--accent);
+            background: var(--card-hover);
+        }
+
+        .dest-card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .dest-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .dest-meta {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+        }
+
+        .dest-meta .left h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .dest-meta .left p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .price {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            color: var(--bg);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.4);
+        }
+
+        /* FOOTER IMAGE (UPDATED SIZE) */
+        .bottom-image-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 90px;
+            margin-bottom: 40px;
+        }
+
+        .bottom-image-section img {
+            width: 1300px;
+            /* ⬅ SIZE INCREASED */
+            max-width: 100%;
+            /* Responsive */
+            opacity: 0.95;
+        }
+
+
+        /* responsive (no changes needed) */
+        @media (max-width:1100px) {
+            .hero-left {
+                width: 58%
+            }
+
+            .hero-right {
+                width: 42%
+            }
+
+            .hero-cream {
+                right: -80px;
+                top: -60px;
+                width: 520px;
+            }
+
+            .hero-girl {
+                width: 520px
+            }
+
+            .headline {
+                font-size: 54px
+            }
+        }
+
+        @media (max-width:900px) {
+            nav ul {
+                display: none
+            }
+
+            .hero {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                min-height: auto
+            }
+
+            .hero-left,
+            .hero-right {
+                width: 100%
+            }
+
+            .hero-girl {
+                width: 360px;
+                display: block;
+                margin: 0 auto 8px;
+                transform: none
+            }
+
+            .service-grid {
+                flex-direction: column
+            }
+
+            .dest-grid {
+                flex-direction: column
+            }
+
+            .card {
+                width: 100%;
+            }
+        }
+
+        @media (max-width:480px) {
+            .headline {
+                font-size: 36px
+            }
+
+            .headline-outline {
+                display: none
+            }
+
+            /* hide decoration on tiny screens */
+            .hero-girl {
+                width: 280px
+            }
+
+            .brand h1 {
+                font-size: 28px
+            }
+
+            .avatar {
+                width: 48px;
+                height: 48px
+            }
+        }
+
+        /* subtle entrance animation */
+        .fade-up {
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.2, 0.9, 0.25, 1);
+        }
+
+        .fade-up.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced footer */
+        footer {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 50px 20px;
+            margin-top: 80px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        footer strong {
+            color: var(--accent);
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <header>
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="logo"
+                    onerror="this.style.display='none'">
+                <h1>Raahi</h1>
+            </div>
+
+            <div class="nav-right">
+                <nav>
+                    <ul>
+                        <li><a href="#">Hotels</a></li>
+                        <li><a href="{{ url_for('documents') }}">Documents</a></li> <li><a id="link-login" href="{{ url_for('login') }}">Login</a></li>
+                    </ul>
+                </nav>
+                <a id="link-signup" class="btn-outline" href="{{ url_for('login') }}">Sign up</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <img src="{{ url_for('static', filename='images/Decore.png') }}" class="hero-cream" alt="decor"
+                onerror="this.style.display='none'">
+
+            <div class="hero-left">
+                <div class="eyebrow">BEST DESTINATIONS AROUND THE WORLD</div>
+
+                <div style="position:relative;">
+                    <h1 class="headline">Travel, enjoy<br>and live a new<br>and full life</h1>
+                    <img src="{{ url_for('static', filename='images/headline-outline.png') }}" class="headline-outline"
+                        alt="" onerror="this.style.display='none'">
+                </div>
+
+                <div class="subtext">Built Wicket longer admire do barton vanity itself do in it. Preferred to sportsmen
+                    in engrossed listening.</div>
+
+                <div class="actions">
+                    <a id="btn-findout" class="btn-primary requires-login" href="{{ url_for('realtime') }}"
+                        style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                        <span>Find out more</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <img src="{{ url_for('static', filename='images/Image.png') }}" class="hero-girl" alt="traveler"
+                    onerror="this.style.display='none'">
+            </div>
+        </section>
+
+        <section class="services" aria-label="Services">
+            <h2>We Offer Best Services</h2>
+            <div class="service-sub">Category</div>
+
+            <div class="service-grid">
+                <a class="card fade-up requires-login" href="{{ url_for('realtime') }}" title="Open realtime location">
+                    <div class="icon"><img src="{{ url_for('static', filename='images/plane.png') }}" alt="plane"
+                            onerror="this.style.display='none'"></div>
+                    <div>
+                        <h3>Realtime Location</h3>
+                        <p>Track routes, set safe-zones and share live location.</p>
+                    </div>
+                </a>
+
+
+                <a class="card fade-up" href="{{ url_for('fraude') }}">
+                    <div class="icon"><img src="{{ url_for('static', filename='images/phone.png') }}" alt="phone"></div>
+                    <div>
+                        <h3>Complaint Management</h3>
+                        <p>Report scams, fraud, or safety issues. Securely stored on Blockchain.</p>
+                    </div>
+                </a>
+
+
+                <a class="card fade-up requires-login" href="{{ url_for('sos') }}" title="Emergency Alert & Audit">
+                    <div class="icon"><img src="{{ url_for('static', filename='images/alerts.png') }}" alt="alerts"
+                            onerror="this.style.display='none'"></div>
+                    <div>
+                        <h3>SOS Emergency</h3>
+                        <p>Instant alert and immutable audit record for legal proof.</p>
+                    </div>
+                </a>
+
+
+                <div class="card fade-up">
+                    <div class="icon"><img src="{{ url_for('static', filename='images/wallpaper1.jpg') }}" alt="weather"
+                            onerror="this.style.display='none'"></div>
+                    <div>
+                        <h3>Weather Report</h3>
+                        <p>Real-time alerts and travel advisories.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="top-dest" aria-label="Top destinations">
+            <h2>Top Destinations</h2>
+
+            <div class="dest-grid">
+                <div class="dest-card fade-up">
+                    <img src="{{ url_for('static', filename='images/hawa.jpg') }}" alt="Hawa Mahal"
+                        onerror="this.style.display='none'">
+                    <div class="dest-meta">
+                        <div class="left">
+                            <h3>Hawa Mahal</h3>
+                            <p>Jaipur</p>
+                        </div>
+                        <div class="price">$5.42k</div>
+                    </div>
+                </div>
+
+                <div class="dest-card fade-up">
+                    <img src="{{ url_for('static', filename='images/nehar.jpg') }}" alt="Nahargarh Fort"
+                        onerror="this.style.display='none'">
+                    <div class="dest-meta">
+                        <div class="left">
+                            <h3>Nahargarh Fort</h3>
+                            <p>Jaipur</p>
+                        </div>
+                        <div class="price">$4.2k</div>
+                    </div>
+                </div>
+
+                <div class="dest-card fade-up">
+                    <img src="{{ url_for('static', filename='images/jantar.jpg') }}" alt="Jantar Mantar"
+                        onerror="this.style.display='none'">
+                    <div class="dest-meta">
+                        <div class="left">
+                            <h3>Jantar Mantar</h3>
+                            <p>Jaipur</p>
+                        </div>
+                        <div class="price">$1.8k</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="bottom-image-section">
+            <img src="{{ url_for('static', filename='images/bottom.png') }}" alt="bottom graphic"
+                onerror="this.style.display='none'">
+        </div>
+
+        <footer>
+            © <strong>Raahi</strong> — All rights reserved.
+        </footer>
+
+    </div>
+
+    <script>
+        function revealFadeUp() {
+            document.querySelectorAll('.fade-up').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < (window.innerHeight || document.documentElement.clientHeight) - 60) {
+                    el.classList.add('visible');
+                }
+            });
+        }
+        window.addEventListener('load', revealFadeUp);
+        window.addEventListener('scroll', revealFadeUp);
+    </script>
+
+    <script>
+        (async function () {
+            const protectedEls = Array.from(document.querySelectorAll('.requires-login'));
+
+            async function getCurrentUser() {
+                try {
+                    const res = await fetch('/api/current_user', { credentials: 'same-origin' });
+                    const j = await res.json();
+                    if (!res.ok) return null;
+                    return (j && j.ok && j.user) ? j.user : null;
+                } catch (e) { return null; }
+            }
+
+            const user = await getCurrentUser();
+
+            const linkLogin = document.getElementById('link-login');
+            const linkSignup = document.getElementById('link-signup');
+
+            if (user) {
+                if (linkLogin) {
+                    linkLogin.textContent = "Logout";
+                    linkLogin.href = "#";
+                    linkLogin.addEventListener('click', async (ev) => {
+                        ev.preventDefault();
+                        try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }); } catch (e) { }
+                        location.href = '/';
+                    });
+                }
+
+                if (linkSignup) {
+                    linkSignup.textContent = "Logout";
+                    linkSignup.href = "#";
+                    linkSignup.addEventListener('click', async (ev) => {
+                        ev.preventDefault();
+                        try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }); } catch (e) { }
+                        location.href = '/';
+                    });
+                }
+
+                protectedEls.forEach(el => { el.onclick = null; });
+
+            } else {
+                protectedEls.forEach(el => {
+                    el.addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        try {
+                            sessionStorage.setItem('safarik_post_login_redirect', el.getAttribute('href') || '/realtime');
+                        } catch (e) { }
+                        location.href = "{{ url_for('login') }}";
+                    });
+                });
+            }
+        })();
+    </script>
+
+</body>
+
+</html>
